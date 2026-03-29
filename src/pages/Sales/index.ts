@@ -1,0 +1,2 @@
+// Sales Page
+export {};

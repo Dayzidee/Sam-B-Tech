@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  --font-headline: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-label: "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: #f9f9fb;
+  --color-on-primary-fixed: #271900;
+  --color-on-secondary-container: #646464;
+  --color-outline: #827560;
+  --color-on-background: #1a1c1d;
+  --color-on-error-container: #93000a;
+  --color-surface: #f9f9fb;
+  --color-surface-container: #eeeef0;
+  --color-error-container: #ffdad6;
+  --color-on-tertiary-container: #a80100;
+  --color-secondary-container: #e2e2e2;
+  --color-on-secondary-fixed-variant: #474747;
+  --color-surface-container-low: #f3f3f5;
+  --color-on-tertiary-fixed: #410000;
+  --color-primary-fixed-dim: #febb14;
+  --color-on-tertiary: #ffffff;
+  --color-surface-bright: #f9f9fb;
+  --color-tertiary-fixed-dim: #ffb4a8;
+  --color-surface-variant: #e2e2e4;
+  --color-surface-dim: #d9dadc;
+  --color-secondary-fixed: #e2e2e2;
+  --color-tertiary-container: #ffb2a6;
+  --color-inverse-primary: #febb14;
+  --color-surface-tint: #7b5800;
+  --color-on-error: #ffffff;
+  --color-surface-container-highest: #e2e2e4;
+  --color-on-primary-container: #6b4c00;
+  --color-primary-container: #fdba12;
+  --color-surface-container-high: #e8e8ea;
+  --color-on-secondary: #ffffff;
+  --color-inverse-on-surface: #f0f0f2;
+  --color-secondary: #5e5e5e;
+  --color-error: #ba1a1a;
+  --color-on-surface-variant: #504533;
+  --color-primary: #7b5800;
+  --color-inverse-surface: #2f3132;
+  --color-tertiary-fixed: #ffdad4;
+  --color-on-tertiary-fixed-variant: #930100;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-fixed-variant: #5d4200;
+  --color-on-secondary-fixed: #1b1b1b;
+  --color-on-surface: #1a1c1d;
+  --color-tertiary: #c00100;
+  --color-secondary-fixed-dim: #c6c6c6;
+  --color-primary-fixed: #ffdea5;
+  --color-outline-variant: #d4c4ac;
+}
+
+@layer base {
+  html, body, #root {
+    @apply h-full overflow-hidden;
+  }
+  body {
+    @apply bg-background text-on-background font-body;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-headline;
+  }
+
+  /* Custom Scrollbar Styles */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-outline-variant) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-outline-variant);
+    border-radius: 20px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+  }
+
+  /* For elements with auto overflow */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-outline-variant) transparent;
+  }
+}

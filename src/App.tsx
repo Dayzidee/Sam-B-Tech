@@ -1,0 +1,63 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useEffect, useRef, type RefObject } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { BottomNav } from '@/components/layout/BottomNav';
+import { HomePage } from '@/pages/Home/HomePage';
+import { GadgetsPage } from '@/pages/Gadgets/GadgetsPage';
+import { ProductDetailsPage } from '@/pages/ProductDetails/ProductDetailsPage';
+import { SalesPage } from '@/pages/Sales/SalesPage';
+import { TradeInPage } from '@/pages/TradeIn/TradeInPage';
+import { SupportPage } from '@/pages/Support/SupportPage';
+import { DashboardPage } from '@/pages/Dashboard/DashboardPage';
+import { FavouritesPage } from '@/pages/Favourites/FavouritesPage';
+import { CheckoutPage } from '@/pages/Checkout/CheckoutPage';
+
+const ScrollToTop = ({ scrollRef }: { scrollRef: RefObject<HTMLElement | null> }) => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo(0, 0);
+    }
+  }, [pathname, scrollRef]);
+
+  return null;
+};
+
+export default function App() {
+  const mainRef = useRef<HTMLElement>(null);
+
+  return (
+    <Router>
+      <ScrollToTop scrollRef={mainRef} />
+      <div className="h-full flex flex-col relative overflow-hidden">
+        <Header />
+        <main ref={mainRef} className="flex-grow overflow-y-auto pt-16">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/gadgets" element={<GadgetsPage />} />
+            <Route path="/sales" element={<SalesPage />} />
+            <Route path="/trade-in" element={<TradeInPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/favourites" element={<FavouritesPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/product/:id" element={<ProductDetailsPage />} />
+            {/* Fallback for now */}
+            <Route path="*" element={<HomePage />} />
+          </Routes>
+          <Footer />
+          {/* Add padding for mobile bottom nav */}
+          <div className="h-16 md:hidden" />
+        </main>
+        <BottomNav />
+      </div>
+    </Router>
+  );
+}

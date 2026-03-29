@@ -1,0 +1,2 @@
+// Checkout Page
+export {};
