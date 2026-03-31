@@ -219,10 +219,16 @@ export const AdminProducts = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="font-headline font-black text-3xl">Products</h1>
-          <p className="text-secondary text-sm">Manage your inventory and product listings</p>
+          <h1 className="font-headline font-black text-3xl text-zinc-900 tracking-tight">Inventory</h1>
+          <p className="text-zinc-500 text-sm">Manage your listings and stock levels</p>
         </div>
-        <Button onClick={() => { if (isAdding) { setEditingProductId(null); resetForm(); } setIsAdding(!isAdding); }} className="flex items-center gap-2">
+        <Button 
+          onClick={() => { if (isAdding) { setEditingProductId(null); resetForm(); } setIsAdding(!isAdding); }} 
+          className={cn(
+            "flex items-center gap-2 transition-all duration-300",
+            isAdding ? "bg-zinc-100 text-zinc-600 hover:bg-zinc-200" : "bg-zinc-900 text-white hover:bg-zinc-800"
+          )}
+        >
           {isAdding ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {isAdding ? 'Cancel' : 'Add New Product'}
         </Button>
@@ -231,33 +237,56 @@ export const AdminProducts = () => {
       <AnimatePresence mode="wait">
         {isAdding ? (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="bg-surface-container-lowest p-6 md:p-8 rounded-2xl shadow-sm border border-outline-variant/20"
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-white/70 backdrop-blur-2xl p-6 md:p-8 rounded-3xl shadow-sm border border-white/50"
           >
-            <h2 className="font-headline font-bold text-xl mb-6">{editingProductId ? 'Edit Product' : 'Create New Listing'}</h2>
+            <h2 className="font-headline font-bold text-xl mb-6 text-zinc-900">{editingProductId ? 'Edit Product' : 'Create New Listing'}</h2>
             <form onSubmit={handleAddProduct} className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Product Name</label>
-                    <Input required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} placeholder="e.g. iPhone 15 Pro Max" />
+                    <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Product Identity</label>
+                    <Input 
+                      required 
+                      value={newProduct.name} 
+                      onChange={e => setNewProduct({...newProduct, name: e.target.value})} 
+                      placeholder="e.g. iPhone 16 Pro Max" 
+                      className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Price (₦)</label>
-                      <Input type="number" required value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: Number(e.target.value)})} placeholder="1200000" />
+                      <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Retail Price (₦)</label>
+                      <Input 
+                        type="number" 
+                        required 
+                        value={newProduct.price} 
+                        onChange={e => setNewProduct({...newProduct, price: Number(e.target.value)})} 
+                        placeholder="1,200,000" 
+                        className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Discount Price (₦)</label>
-                      <Input type="number" value={newProduct.discountPrice} onChange={e => setNewProduct({...newProduct, discountPrice: Number(e.target.value)})} placeholder="Optional" />
+                      <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Offer Price (₦)</label>
+                      <Input 
+                        type="number" 
+                        value={newProduct.discountPrice} 
+                        onChange={e => setNewProduct({...newProduct, discountPrice: Number(e.target.value)})} 
+                        placeholder="Sale price (optional)" 
+                        className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                      />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Category</label>
-                      <select className="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}>
+                      <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Category</label>
+                      <select 
+                        className="w-full h-12 px-4 rounded-2xl border border-zinc-200/50 bg-zinc-50/50 text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/5 text-sm" 
+                        value={newProduct.category} 
+                        onChange={e => setNewProduct({...newProduct, category: e.target.value})}
+                      >
                         <option>Phones</option>
                         <option>Laptops</option>
                         <option>Accessories</option>
@@ -266,8 +295,12 @@ export const AdminProducts = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Condition</label>
-                      <select className="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" value={newProduct.condition} onChange={e => setNewProduct({...newProduct, condition: e.target.value as any})}>
+                      <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Condition</label>
+                      <select 
+                        className="w-full h-12 px-4 rounded-2xl border border-zinc-200/50 bg-zinc-50/50 text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/5 text-sm" 
+                        value={newProduct.condition} 
+                        onChange={e => setNewProduct({...newProduct, condition: e.target.value as any})}
+                      >
                         <option>Brand New</option>
                         <option>UK Used</option>
                         <option>Refurbished</option>
@@ -276,34 +309,43 @@ export const AdminProducts = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Inventory Quantity</label>
-                    <Input type="number" required value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})} placeholder="Quantity in stock" />
+                    <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Current Stock</label>
+                    <Input 
+                      type="number" 
+                      required 
+                      value={newProduct.stock} 
+                      onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})} 
+                      placeholder="Available quantity" 
+                      className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                    />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Full Description</label>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Detailed Description</label>
                     <textarea 
-                      className="w-full p-4 rounded-xl border border-outline-variant bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 min-h-[120px] resize-none"
+                      className="w-full p-4 rounded-2xl border border-zinc-200/50 bg-zinc-50/50 text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/5 min-h-[120px] resize-none text-sm placeholder:text-zinc-400"
                       value={newProduct.description}
                       onChange={e => setNewProduct({...newProduct, description: e.target.value})}
-                      placeholder="Detailed product specifications, features, and warranty info..."
+                      placeholder="Specifications, warranty details, and unique selling points..."
                     />
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-8">
                   <div>
-                    <h3 className="font-bold text-sm uppercase tracking-widest text-secondary border-b border-outline-variant/30 pb-2 mb-4">Media Gallary</h3>
-                    <div className="grid grid-cols-4 gap-4 mb-4">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4 ml-1">Visual Gallery</h3>
+                    <div className="grid grid-cols-4 gap-3 mb-4">
                       {newProduct.images?.map((url, idx) => (
-                        <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-outline-variant">
-                          <img src={url} alt="Product" className="w-full h-full object-cover" />
-                          <button 
-                            type="button"
-                            onClick={() => removeImage(idx)}
-                            className="absolute top-1 right-1 p-1 bg-error text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
+                        <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden border border-zinc-100 bg-white shadow-sm">
+                          <img src={url} alt="Product" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button 
+                              type="button"
+                              onClick={() => removeImage(idx)}
+                              className="p-2 bg-red-500 text-white rounded-xl shadow-lg hover:bg-red-600 transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                       {newProduct.images && newProduct.images.length < 5 && (
@@ -311,58 +353,98 @@ export const AdminProducts = () => {
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={uploadingImage}
-                          className="aspect-square rounded-xl border-2 border-dashed border-outline-variant flex flex-col items-center justify-center hover:bg-surface-container-low transition-colors disabled:opacity-50"
+                          className="aspect-square rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50/30 flex flex-col items-center justify-center hover:bg-zinc-100/50 transition-all disabled:opacity-50 group hover:border-zinc-400"
                         >
                           {uploadingImage ? (
-                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                            <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
                           ) : (
                             <>
-                              <Plus className="w-6 h-6 text-secondary mb-1" />
-                              <span className="text-[10px] font-bold uppercase text-secondary">Add Image</span>
+                              <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+                                <Plus className="w-4 h-4 text-zinc-900" />
+                              </div>
+                              <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Add Image</span>
                             </>
                           )}
                         </button>
                       )}
                     </div>
                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
-                    <p className="text-[10px] text-secondary italic">Minimum 1 image required. First image is the primary thumbnail.</p>
+                    <p className="text-[10px] text-zinc-400 italic font-medium">Minimum 1 media asset required. First image is used as primary.</p>
                   </div>
 
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-sm uppercase tracking-widest text-secondary border-b border-outline-variant/30 pb-2">Attributes</h3>
+                  <div className="space-y-6 pt-2">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-1 ml-1 leading-none">Specifications & Attributes</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Colors (comma separated)</label>
-                        <Input value={Array.isArray(newProduct.colors) ? newProduct.colors.join(', ') : newProduct.colors} onChange={e => setNewProduct({...newProduct, colors: e.target.value as any})} placeholder="Natural Titanium, Blue..." />
+                        <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Available Colors</label>
+                        <Input 
+                          value={Array.isArray(newProduct.colors) ? newProduct.colors.join(', ') : newProduct.colors} 
+                          onChange={e => setNewProduct({...newProduct, colors: e.target.value as any})} 
+                          placeholder="Titanium, Silver..." 
+                          className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Storage (comma separated)</label>
-                        <Input value={Array.isArray(newProduct.storage) ? newProduct.storage.join(', ') : newProduct.storage} onChange={e => setNewProduct({...newProduct, storage: e.target.value as any})} placeholder="256GB, 512GB..." />
+                        <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Capacity</label>
+                        <Input 
+                          value={Array.isArray(newProduct.storage) ? newProduct.storage.join(', ') : newProduct.storage} 
+                          onChange={e => setNewProduct({...newProduct, storage: e.target.value as any})} 
+                          placeholder="256GB, 1TB..." 
+                          className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                        />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2">Battery Health/Cycle (if used)</label>
-                      <Input value={newProduct.batteryHealth} onChange={e => setNewProduct({...newProduct, batteryHealth: e.target.value})} placeholder="e.g. 100% (45 cycles)" />
+                      <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-zinc-400 mb-2 ml-1">Battery Condition (Used only)</label>
+                      <Input 
+                        value={newProduct.batteryHealth} 
+                        onChange={e => setNewProduct({...newProduct, batteryHealth: e.target.value})} 
+                        placeholder="e.g. 98% BH" 
+                        className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                      />
                     </div>
                     
-                    <div className="space-y-3 pt-2">
-                      <label className="block text-xs font-bold uppercase tracking-widest text-secondary">Technical Specs</label>
+                    <div className="space-y-4 pt-2">
                       <div className="grid grid-cols-2 gap-4">
-                        <Input value={newProduct.specs?.display} onChange={e => setNewProduct({...newProduct, specs: {...newProduct.specs!, display: e.target.value}})} placeholder="Display" />
-                        <Input value={newProduct.specs?.chip} onChange={e => setNewProduct({...newProduct, specs: {...newProduct.specs!, chip: e.target.value}})} placeholder="Processor" />
-                        <Input value={newProduct.specs?.camera} onChange={e => setNewProduct({...newProduct, specs: {...newProduct.specs!, camera: e.target.value}})} placeholder="Camera" />
-                        <Input value={newProduct.specs?.os} onChange={e => setNewProduct({...newProduct, specs: {...newProduct.specs!, os: e.target.value}})} placeholder="OS Version" />
+                        <Input 
+                          value={newProduct.specs?.display} 
+                          onChange={e => setNewProduct({...newProduct, specs: {...newProduct.specs!, display: e.target.value}})} 
+                          placeholder="Display Tech" 
+                          className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                        />
+                        <Input 
+                          value={newProduct.specs?.chip} 
+                          onChange={e => setNewProduct({...newProduct, specs: {...newProduct.specs!, chip: e.target.value}})} 
+                          placeholder="Chipset" 
+                          className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                        />
+                        <Input 
+                          value={newProduct.specs?.camera} 
+                          onChange={e => setNewProduct({...newProduct, specs: {...newProduct.specs!, camera: e.target.value}})} 
+                          placeholder="Camera System" 
+                          className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                        />
+                        <Input 
+                          value={newProduct.specs?.os} 
+                          onChange={e => setNewProduct({...newProduct, specs: {...newProduct.specs!, os: e.target.value}})} 
+                          placeholder="OS" 
+                          className="bg-zinc-50/50 border-zinc-200/50 focus:bg-white"
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4 pt-6 border-t border-outline-variant/30">
-                <Button type="button" variant="outline" onClick={() => setIsAdding(false)}>Cancel</Button>
-                <Button type="submit" disabled={isSaving || (newProduct.images?.length || 0) === 0} className="min-w-[150px]">
+              <div className="flex justify-end gap-3 pt-8 border-t border-zinc-100">
+                <Button type="button" variant="outline" onClick={() => setIsAdding(false)} className="rounded-2xl border-zinc-200 text-zinc-600 px-8">Discard</Button>
+                <Button 
+                  type="submit" 
+                  disabled={isSaving || (newProduct.images?.length || 0) === 0} 
+                  className="min-w-[150px] rounded-2xl bg-zinc-900 text-white hover:bg-zinc-800 px-8 disabled:bg-zinc-200"
+                >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                  {isSaving ? (editingProductId ? 'Updating...' : 'Publishing...') : (editingProductId ? 'Update Product' : 'Publish Product')}
+                  {isSaving ? 'Synchronizing...' : (editingProductId ? 'Update Item' : 'Publish Product')}
                 </Button>
               </div>
             </form>
@@ -372,23 +454,24 @@ export const AdminProducts = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden"
+            className="bg-white/70 backdrop-blur-2xl rounded-3xl shadow-sm border border-white/50 overflow-hidden"
           >
-            <div className="p-4 border-b border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="p-5 border-b border-zinc-100 flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="relative w-full max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <Input 
-                  className="pl-10 h-10" 
-                  placeholder="Search by name..." 
+                  className="pl-11 h-11 bg-zinc-50/50 border-zinc-200/50 focus:bg-white rounded-2xl text-sm" 
+                  placeholder="Search inventory..." 
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
               </div>
               <div className="flex gap-2 w-full md:w-auto">
                 <select 
-                  className="h-10 px-3 rounded-lg border border-outline-variant bg-surface text-sm font-bold text-secondary focus:outline-none w-full md:w-auto"
+                  className="h-11 px-4 rounded-2xl border border-zinc-200/50 bg-zinc-50/50 text-sm font-black text-zinc-600 focus:bg-white focus:outline-none w-full md:w-auto appearance-none pr-8 cursor-pointer hover:bg-zinc-100/50 transition-colors"
                   value={categoryFilter}
                   onChange={e => setCategoryFilter(e.target.value)}
+                  style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0\' stroke=\'%23a1a1aa\' stroke-width=\'2\'%3E%3Cpath d=\'m19 9-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1rem' }}
                 >
                   <option>All Categories</option>
                   <option>Phones</option>
@@ -397,8 +480,12 @@ export const AdminProducts = () => {
                   <option>Watches</option>
                   <option>Tablets</option>
                 </select>
-                <Button variant="outline" className="h-10" onClick={fetchProducts}>
-                  Refresh
+                <Button 
+                  variant="outline" 
+                  className="h-11 rounded-2xl border-zinc-200 text-zinc-600 hover:bg-zinc-50 px-6 font-bold" 
+                  onClick={fetchProducts}
+                >
+                  Refresh data
                 </Button>
               </div>
             </div>
@@ -406,91 +493,96 @@ export const AdminProducts = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-surface-container-low text-secondary text-xs uppercase tracking-widest text-nowrap">
-                    <th className="p-4 font-black">Product Item</th>
-                    <th className="p-4 font-black text-center">Category</th>
-                    <th className="p-4 font-black">Market Value</th>
-                    <th className="p-4 font-black text-center">Stock</th>
-                    <th className="p-4 font-black text-right">Actions</th>
+                  <tr className="bg-zinc-50/50 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em] text-nowrap border-b border-zinc-100">
+                    <th className="p-5">Product Master</th>
+                    <th className="p-5 text-center">Category</th>
+                    <th className="p-5">Market Value</th>
+                    <th className="p-5 text-center">Unit Stock</th>
+                    <th className="p-5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-outline-variant/20">
+                <tbody className="divide-y divide-zinc-100">
                   {isLoading ? (
                     <tr>
                       <td colSpan={5} className="p-20 text-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                        <p className="text-secondary font-bold">Synchronizing with SamB DB...</p>
+                        <Loader2 className="w-10 h-10 animate-spin text-zinc-200 mx-auto mb-4" />
+                        <p className="text-zinc-400 font-bold uppercase tracking-widest text-[10px]">Synchronizing Cloud Database...</p>
                       </td>
                     </tr>
                   ) : filteredProducts.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="p-20 text-center">
-                        <div className="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Search className="w-8 h-8 text-secondary" />
+                        <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-zinc-100 text-zinc-300">
+                          <Search className="w-8 h-8" />
                         </div>
-                        <p className="text-secondary font-bold text-lg">No products found</p>
-                        <p className="text-secondary/60 text-sm">Try adjusting your filters or search terms</p>
+                        <p className="text-zinc-900 font-bold text-lg">No matches found</p>
+                        <p className="text-zinc-400 text-sm mt-1">Try refining your search terms or filters</p>
                       </td>
                     </tr>
                   ) : (
                     filteredProducts.map((product) => (
-                      <tr key={product.id} className="hover:bg-surface-container-low/50 transition-colors">
-                        <td className="p-4">
+                      <tr key={product.id} className="group hover:bg-zinc-50/50 transition-colors">
+                        <td className="p-5">
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-surface-container-highest rounded-xl overflow-hidden border border-outline-variant/30 flex-shrink-0">
+                            <div className="w-14 h-14 bg-zinc-100 rounded-2xl overflow-hidden border border-zinc-200/30 flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
                               {product.images && product.images.length > 0 ? (
                                 <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                  <ImageIcon className="w-5 h-5 text-secondary/40" />
+                                  <ImageIcon className="w-6 h-6 text-zinc-300" />
                                 </div>
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="font-bold text-sm truncate max-w-[200px]">{product.name}</p>
-                              <div className="flex gap-2 mt-0.5">
-                                <span className="text-[10px] font-black uppercase text-primary/80">{product.condition}</span>
+                              <p className="font-bold text-zinc-900 text-sm truncate max-w-[240px] tracking-tight">{product.name}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={cn(
+                                  "text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded shadow-sm",
+                                  product.condition === 'Brand New' ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600"
+                                )}>
+                                  {product.condition}
+                                </span>
                                 {product.discountPrice > 0 && (
-                                  <span className="text-[10px] font-black uppercase text-error/80">On Sale</span>
+                                  <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-100 text-red-600">On Sale</span>
                                 )}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 text-center">
-                          <span className="text-xs font-bold px-2 py-1 bg-surface-container-high rounded-md">
+                        <td className="p-5 text-center">
+                          <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-zinc-100 text-zinc-600 rounded-xl">
                             {product.category}
                           </span>
                         </td>
-                        <td className="p-4">
+                        <td className="p-5">
                           <div className="space-y-0.5">
-                            <p className="font-black text-sm">{formatCurrency(product.price)}</p>
+                            <p className="font-black text-zinc-900 text-sm">{formatCurrency(product.price)}</p>
                             {product.discountPrice > 0 && (
-                              <p className="text-[10px] text-secondary line-through italic opacity-50">{formatCurrency(product.discountPrice)}</p>
+                              <p className="text-[10px] text-zinc-400 line-through font-medium">{formatCurrency(product.discountPrice)}</p>
                             )}
                           </div>
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-5 text-center">
                           <motion.div 
-                            initial={{ scale: 0.9 }}
-                            animate={{ scale: 1 }}
+                            initial={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.05 }}
                             className={cn(
-                              "inline-flex items-center justify-center w-10 h-10 rounded-xl text-xs font-black",
-                              product.stock > 10 ? "bg-green-100 text-green-700 shadow-sm shadow-green-100" : 
-                              product.stock > 0 ? "bg-amber-100 text-amber-700 shadow-sm shadow-amber-100" : 
-                              "bg-red-100 text-red-700 shadow-sm shadow-red-100"
+                              "inline-flex items-center justify-center min-w-[3rem] h-10 px-3 rounded-2xl text-xs font-black shadow-sm",
+                              product.stock > 10 ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : 
+                              product.stock > 0 ? "bg-amber-50 text-amber-600 border border-amber-100" : 
+                              "bg-red-50 text-red-600 border border-red-100"
                             )}>
                             {product.stock}
                           </motion.div>
                         </td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => startEdit(product)} className="p-2.5 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-xl transition-all active:scale-95">
+                        <td className="p-5 text-right">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => startEdit(product)} className="p-3 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-2xl transition-all">
                               <Edit className="w-4 h-4" />
                             </button>
                             <button 
                               onClick={() => handleDelete(product.id)}
-                              className="p-2.5 text-secondary hover:text-error hover:bg-error/10 rounded-xl transition-all active:scale-95"
+                              className="p-3 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>

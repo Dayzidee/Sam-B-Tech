@@ -126,33 +126,37 @@ export const AdminTradeIns = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="font-headline font-black text-3xl">Trade-In Portal</h1>
-          <p className="text-secondary text-sm">Review, value, and manage customer device trade-ins</p>
+          <h1 className="font-headline font-black text-4xl text-zinc-950 tracking-tight">Trade-In Portal</h1>
+          <p className="text-zinc-500 text-sm mt-1">Review, value, and manage customer device trade-ins</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchRequests} className="flex items-center gap-2">
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            onClick={fetchRequests} 
+            className="flex items-center gap-2 border-zinc-200 hover:bg-zinc-50 transition-all rounded-xl"
+          >
             <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} /> Refresh
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className={cn(
-          "bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden flex flex-col min-h-[500px]",
+          "backdrop-blur-xl bg-white/70 rounded-3xl shadow-sm border border-zinc-200/50 overflow-hidden flex flex-col min-h-[600px] transition-all",
           selectedRequest ? "lg:col-span-2" : "lg:col-span-3"
         )}>
-          <div className="p-4 border-b border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
+          <div className="p-5 border-b border-zinc-100 flex flex-col md:flex-row items-center justify-between gap-4 bg-white/40">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input 
-                className="pl-10 h-10" 
-                placeholder="Search by ID or customer..." 
+                className="pl-12 h-12 bg-white/50 border-zinc-100 focus:bg-white transition-all rounded-2xl" 
+                placeholder="Search by ID or customer name..." 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
             <select 
-              className="h-10 px-3 rounded-lg border border-outline-variant bg-surface text-sm font-bold text-secondary focus:outline-none w-full md:w-auto"
+              className="h-12 px-4 rounded-2xl border border-zinc-100 bg-white/50 text-sm font-bold text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-100 w-full md:w-auto transition-all"
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
             >
@@ -168,27 +172,29 @@ export const AdminTradeIns = () => {
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-surface-container-low text-secondary text-xs uppercase tracking-widest text-nowrap">
-                  <th className="p-4 font-black">Ref ID</th>
-                  <th className="p-4 font-black">Customer</th>
-                  <th className="p-4 font-black">Device Model</th>
-                  <th className="p-4 font-black text-center">Status</th>
-                  <th className="p-4 font-black text-right">Action</th>
+                <tr className="bg-zinc-50/50 text-zinc-500 text-[10px] uppercase font-black tracking-[0.2em]">
+                  <th className="p-6">Ref ID</th>
+                  <th className="p-6">Customer</th>
+                  <th className="p-6">Device Model</th>
+                  <th className="p-6 text-center">Status</th>
+                  <th className="p-6 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/20">
+              <tbody className="divide-y divide-zinc-100">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={5} className="p-20 text-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                      <p className="text-secondary font-bold">Fetching latest requests...</p>
+                    <td colSpan={5} className="p-24 text-center">
+                      <Loader2 className="w-10 h-10 animate-spin text-zinc-300 mx-auto mb-6" />
+                      <p className="text-zinc-500 font-medium">Synchronizing requests...</p>
                     </td>
                   </tr>
                 ) : filteredRequests.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-20 text-center">
-                      <Smartphone className="w-12 h-12 text-secondary/30 mx-auto mb-4" />
-                      <p className="text-secondary font-bold">No trade-in requests found</p>
+                    <td colSpan={5} className="p-24 text-center">
+                      <div className="w-16 h-16 bg-zinc-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <Smartphone className="w-8 h-8 text-zinc-200" />
+                      </div>
+                      <p className="text-zinc-500 font-medium">No trade-in requests found</p>
                     </td>
                   </tr>
                 ) : (
@@ -196,26 +202,37 @@ export const AdminTradeIns = () => {
                     <tr 
                       key={request.id} 
                       className={cn(
-                        "hover:bg-surface-container-low/50 transition-colors cursor-pointer",
-                        selectedRequest?.id === request.id ? "bg-primary-container/10" : ""
+                        "hover:bg-zinc-50/50 transition-all cursor-pointer group",
+                        selectedRequest?.id === request.id ? "bg-zinc-50/80" : ""
                       )}
                       onClick={() => setSelectedRequest(request)}
                     >
-                      <td className="p-4 font-mono text-xs font-bold">{request.id?.slice(0, 8)}</td>
-                      <td className="p-4">
-                        <p className="font-bold text-sm">{request.userName}</p>
-                        <p className="text-[10px] text-secondary">{request.userEmail || 'No email'}</p>
+                      <td className="p-6">
+                        <span className="font-mono text-xs font-black text-zinc-400">#{request.id?.slice(0, 8)}</span>
                       </td>
-                      <td className="p-4 font-black text-sm">{request.deviceModel}</td>
-                      <td className="p-4 text-center">
-                        <span className={cn("px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border", getStatusColor(request.status))}>
+                      <td className="p-6">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-zinc-950 text-sm group-hover:text-primary transition-colors">{request.userName}</span>
+                          <span className="text-[10px] text-zinc-400 font-medium mt-0.5">{request.userEmail || 'No email associated'}</span>
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <span className="font-black text-sm text-zinc-800">{request.deviceModel}</span>
+                      </td>
+                      <td className="p-6 text-center">
+                        <span className={cn(
+                          "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all", 
+                          getStatusColor(request.status)
+                        )}>
                           {request.status.replace('-', ' ')}
                         </span>
                       </td>
-                      <td className="p-4 text-right">
-                        <button className="p-2.5 text-primary hover:bg-primary-container/20 rounded-xl transition-all">
-                          <Eye className="w-4 h-4" />
-                        </button>
+                      <td className="p-6 text-right">
+                        <div className="flex justify-end">
+                          <div className="p-2 text-zinc-400 group-hover:text-zinc-950 group-hover:bg-white rounded-xl shadow-none group-hover:shadow-sm border border-transparent group-hover:border-zinc-200 transition-all">
+                            <Eye className="w-4 h-4" />
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -228,107 +245,122 @@ export const AdminTradeIns = () => {
         <AnimatePresence>
           {selectedRequest && (
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col h-full sticky top-0"
+              initial={{ opacity: 0, x: 20, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 20, scale: 0.95 }}
+              className="backdrop-blur-xl bg-white/70 rounded-3xl shadow-xl border border-zinc-200/50 flex flex-col h-fit sticky top-6 overflow-hidden"
             >
-              <div className="p-6 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low/30">
+              <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/30">
                 <div>
-                  <h2 className="font-headline font-bold text-xl uppercase tracking-tight">Request Details</h2>
-                  <p className="text-[10px] text-secondary font-mono mt-0.5">{selectedRequest.id}</p>
+                  <h2 className="font-headline font-black text-xl text-zinc-950 leading-tight">Request Details</h2>
+                  <p className="text-[10px] tracking-widest text-zinc-400 font-black uppercase mt-1">Ref: {selectedRequest.id?.slice(0, 16)}</p>
                 </div>
-                <button onClick={() => setSelectedRequest(null)} className="p-2 text-secondary hover:bg-surface-container-high rounded-full transition-colors">
+                <button 
+                  onClick={() => setSelectedRequest(null)} 
+                  className="p-2.5 text-zinc-400 hover:text-zinc-900 hover:bg-white rounded-2xl border border-transparent hover:border-zinc-100 transition-all"
+                >
                   <XCircle className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-6 flex-1 overflow-y-auto space-y-8">
+              <div className="p-6 overflow-y-auto space-y-8 max-h-[70vh]">
                 <div>
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
-                    <Smartphone className="w-3 h-3" /> Hardware Inspection
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-5 flex items-center gap-2">
+                    <Smartphone className="w-3 h-3" /> Technical Profile
                   </h3>
-                  <div className="bg-surface-container-low p-4 rounded-2xl border border-outline-variant/30">
-                    <h4 className="font-black text-lg mb-2">{selectedRequest.deviceModel}</h4>
-                    <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                  <div className="bg-white/50 p-5 rounded-2xl border border-zinc-100/50 shadow-sm">
+                    <h4 className="font-black text-zinc-900 text-lg mb-4">{selectedRequest.deviceModel}</h4>
+                    <div className="grid grid-cols-2 gap-y-4 gap-x-6">
                       <div className="space-y-1">
-                        <p className="text-secondary uppercase text-[9px] font-bold">Condition</p>
-                        <p className="font-black text-primary uppercase">{selectedRequest.deviceDetails?.condition || 'Not specified'}</p>
+                        <p className="text-zinc-400 uppercase text-[9px] font-black tracking-wider">Condition</p>
+                        <p className="font-black text-sm text-zinc-950 capitalize">{selectedRequest.deviceDetails?.condition || 'Unspecified'}</p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-secondary uppercase text-[9px] font-bold">Storage</p>
-                        <p className="font-black">{selectedRequest.deviceDetails?.storage || 'N/A'}</p>
+                        <p className="text-zinc-400 uppercase text-[9px] font-black tracking-wider">Storage</p>
+                        <p className="font-black text-sm text-zinc-950">{selectedRequest.deviceDetails?.storage || 'N/A'}</p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-secondary uppercase text-[9px] font-bold">Color</p>
-                        <p className="font-black">{selectedRequest.deviceDetails?.color || 'N/A'}</p>
+                        <p className="text-zinc-400 uppercase text-[9px] font-black tracking-wider">Color</p>
+                        <p className="font-black text-sm text-zinc-950">{selectedRequest.deviceDetails?.color || 'N/A'}</p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-secondary uppercase text-[9px] font-bold">Battery</p>
-                        <p className="font-black">{selectedRequest.deviceDetails?.batteryHealth || 'N/A'}</p>
+                        <p className="text-zinc-400 uppercase text-[9px] font-black tracking-wider">Battery</p>
+                        <p className="font-black text-sm text-zinc-950">{selectedRequest.deviceDetails?.batteryHealth || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
-                    <Mail className="w-3 h-3" /> Contact Info
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-5 flex items-center gap-2">
+                    <Mail className="w-3 h-3" /> Customer Channel
                   </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-sm">
-                      <div className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 bg-zinc-50/50 p-3 rounded-2xl border border-zinc-50">
+                      <div className="w-10 h-10 rounded-xl bg-white shadow-sm border border-zinc-100 flex items-center justify-center text-zinc-400">
                         <Mail className="w-4 h-4" />
                       </div>
-                      <div>
-                        <p className="font-bold">{selectedRequest.userName}</p>
-                        <p className="text-xs text-secondary">{selectedRequest.userEmail}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-zinc-950 text-sm truncate">{selectedRequest.userName}</p>
+                        <p className="text-xs text-zinc-500 truncate">{selectedRequest.userEmail}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <div className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary">
+                    <div className="flex items-center gap-4 bg-zinc-50/50 p-3 rounded-2xl border border-zinc-50">
+                      <div className="w-10 h-10 rounded-xl bg-white shadow-sm border border-zinc-100 flex items-center justify-center text-zinc-400">
                         <Phone className="w-4 h-4" />
                       </div>
-                      <p className="font-bold">{selectedRequest.userPhone || 'Not provided'}</p>
+                      <p className="font-bold text-zinc-950 text-sm">{selectedRequest.userPhone || 'Unlisted'}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-primary/5 p-5 rounded-2xl border border-primary/20 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                    <DollarSign className="w-3 h-3" /> Valuation Action
+                <div className="bg-zinc-950 p-6 rounded-3xl shadow-lg shadow-zinc-200/50 space-y-5">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                    <DollarSign className="w-3 h-3" /> Valuation Intelligence
                   </h3>
                   
                   {selectedRequest.status === 'pending' || selectedRequest.status === 'valuation' ? (
                     <div className="space-y-4">
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary" />
+                      <div className="relative group">
+                        <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-white transition-colors" />
                         <Input 
                           type="number" 
-                          placeholder="Enter offer amount (₦)" 
-                          className="pl-10 h-12 text-lg font-black bg-surface"
+                          placeholder="Offer amount (₦)" 
+                          className="pl-12 h-14 text-xl font-black bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-zinc-700 transition-all rounded-2xl"
                           value={valuation}
                           onChange={(e) => setValuation(e.target.value)}
                         />
                       </div>
-                      <Button className="w-full h-12 font-black uppercase tracking-widest text-xs" onClick={handleSendOffer} disabled={!valuation || isUpdating}>
-                        {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Firm Offer'}
+                      <Button 
+                        className="w-full h-14 bg-white text-zinc-950 hover:bg-zinc-100 font-black uppercase tracking-widest text-xs rounded-2xl shadow-sm transition-all" 
+                        onClick={handleSendOffer} 
+                        disabled={!valuation || isUpdating}
+                      >
+                        {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Dispatch Firm Offer'}
                       </Button>
                     </div>
                   ) : (
                     <div className="text-center py-2">
-                      <p className="text-[10px] font-bold text-secondary uppercase mb-1">Current Firm Offer</p>
-                      <p className="font-headline font-black text-3xl text-primary mb-4 italic">
+                      <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Locked Valuation</p>
+                      <p className="font-headline font-black text-4xl text-white mb-6 tracking-tight">
                         {selectedRequest.estimatedValue ? formatCurrency(selectedRequest.estimatedValue) : 'N/A'}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         {selectedRequest.status === 'offer-sent' && (
                           <>
-                            <Button variant="outline" className="flex-1 text-xs h-10 font-bold border-green-200 text-green-700 hover:bg-green-50" onClick={() => updateStatus('accepted')}>
-                              Mark Accepted
+                            <Button 
+                              variant="outline" 
+                              className="flex-1 text-[10px] h-12 font-black uppercase tracking-widest border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 rounded-2xl transition-all" 
+                              onClick={() => updateStatus('accepted')}
+                            >
+                              Accept
                             </Button>
-                            <Button variant="outline" className="flex-1 text-xs h-10 font-bold border-red-200 text-red-700 hover:bg-red-50" onClick={() => updateStatus('rejected')}>
-                              Mark Rejected
+                            <Button 
+                              variant="outline" 
+                              className="flex-1 text-[10px] h-12 font-black uppercase tracking-widest border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 rounded-2xl transition-all" 
+                              onClick={() => updateStatus('rejected')}
+                            >
+                              Reject
                             </Button>
                           </>
                         )}
@@ -337,18 +369,17 @@ export const AdminTradeIns = () => {
                   )}
                 </div>
 
-                {/* Admin Response to Customer */}
-                <div className="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/30 space-y-3">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-secondary">Admin Response to Customer</h3>
+                <div className="bg-white/50 p-6 rounded-3xl border border-zinc-100 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Direct Customer Comms</h3>
                   <textarea
-                    className="w-full p-3 rounded-xl border border-outline-variant bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 min-h-[80px] resize-none text-sm"
-                    placeholder="Type a message for the customer (visible in their dashboard)..."
+                    className="w-full p-4 rounded-2xl border border-zinc-100 bg-white text-zinc-950 placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-zinc-50 min-h-[100px] resize-none text-sm transition-all"
+                    placeholder="Type a formal update for the customer dashboard..."
                     value={adminResponse || selectedRequest.adminResponse || ''}
                     onChange={(e) => setAdminResponse(e.target.value)}
                   />
                   <Button
-                    size="sm"
-                    className="w-full text-xs font-bold"
+                    size="lg"
+                    className="w-full text-xs font-black uppercase tracking-widest rounded-2xl bg-zinc-100 text-zinc-900 hover:bg-zinc-200 border-zinc-200 transition-all"
                     disabled={isUpdating || !adminResponse}
                     onClick={async () => {
                       if (!selectedRequest?.id || !adminResponse) return;
@@ -357,16 +388,16 @@ export const AdminTradeIns = () => {
                         await RepairService.update(selectedRequest.id, { adminResponse });
                         setRequests(prev => prev.map(r => r.id === selectedRequest.id ? { ...r, adminResponse } : r));
                         setSelectedRequest({ ...selectedRequest, adminResponse });
-                        setStatusModal({ show: true, type: 'success', title: 'Response Sent', message: 'Your message has been sent to the customer.' });
+                        setStatusModal({ show: true, type: 'success', title: 'Comms Dispatched', message: 'The customer has been notified of your update.' });
                         setAdminResponse('');
                       } catch (error) {
-                        setStatusModal({ show: true, type: 'error', title: 'Failed', message: 'Could not send the response.' });
+                        setStatusModal({ show: true, type: 'error', title: 'Dispatch Failed', message: 'Could not send the update. Connection error.' });
                       } finally {
                         setIsUpdating(false);
                       }
                     }}
                   >
-                    {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Response'}
+                    {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Update'}
                   </Button>
                 </div>
               </div>

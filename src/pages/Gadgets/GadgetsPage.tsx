@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 // Dynamic products fetched from Firebase
 
 export const GadgetsPage = () => {
-  const [condition, setCondition] = useState<'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned'>('Brand New');
+  const [condition, setCondition] = useState<'ALL' | 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned'>('ALL');
   const [selectedCategories, setSelectedCategories] = useState<Category[]>(['ALL']);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,7 +66,7 @@ export const GadgetsPage = () => {
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.brand.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCondition = p.condition === condition;
+    const matchesCondition = condition === 'ALL' || p.condition === condition;
     const matchesCategory = selectedCategories.includes('ALL') || selectedCategories.length === 0 || selectedCategories.includes(p.category as Category);
     return matchesSearch && matchesCondition && matchesCategory;
   });

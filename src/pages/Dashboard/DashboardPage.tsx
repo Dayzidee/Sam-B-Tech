@@ -316,7 +316,7 @@ const DashboardPage = () => {
                             </td>
                             <td className="px-8 py-5 text-sm font-black text-zinc-900">₦{order.total?.toLocaleString()}</td>
                             <td className="px-8 py-5">
-                              <span className={`inline-flex px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${statusColor(order.status).replace('dark:', '').replace('dark-bg', 'bg').replace('dark-text', 'text')}`}>
+                              <span className={`inline-flex px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${statusColor(order.status)}`}>
                                 {order.status}
                               </span>
                             </td>
@@ -362,7 +362,7 @@ const DashboardPage = () => {
                             <h3 className="font-black text-sm text-zinc-900">{req.deviceModel}</h3>
                             <p className="text-xs text-zinc-500 font-medium">{req.issue}</p>
                           </div>
-                          <span className={`inline-flex px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border self-start ${statusColor(req.status).replace('dark:', '').replace('dark-bg', 'bg').replace('dark-text', 'text')}`}>
+                          <span className={`inline-flex px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border self-start ${statusColor(req.status)}`}>
                             {req.status}
                           </span>
                         </div>
@@ -415,7 +415,7 @@ const DashboardPage = () => {
                             <h3 className="font-black text-sm text-zinc-900">{req.deviceModel}</h3>
                             <p className="text-xs text-zinc-500 font-medium">{req.issue || 'Device trade-in valuation'}</p>
                           </div>
-                          <span className={`inline-flex px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border self-start ${statusColor(req.status).replace('dark:', '').replace('dark-bg', 'bg').replace('dark-text', 'text')}`}>
+                          <span className={`inline-flex px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border self-start ${statusColor(req.status)}`}>
                             {req.status}
                           </span>
                         </div>

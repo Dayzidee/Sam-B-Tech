@@ -26,9 +26,9 @@ export const Header = () => {
   const profilePath = getProfilePath();
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl shadow-sm dark:shadow-none border-b border-zinc-200/50 dark:border-zinc-800/50">
+    <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm border-b border-zinc-200/50">
       <div className="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto">
-        <Link to="/" className="text-2xl font-black tracking-tighter text-black dark:text-white">
+        <Link to="/" className="text-2xl font-black tracking-tighter text-black">
           SAM-B TECH
         </Link>
         
@@ -40,8 +40,8 @@ export const Header = () => {
               className={cn(
                 "transition-colors font-medium",
                 location.pathname === link.path 
-                  ? "text-yellow-600 dark:text-yellow-500 font-bold border-b-2 border-yellow-500 pb-1" 
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
+                  ? "text-yellow-600 font-bold border-b-2 border-yellow-500 pb-1" 
+                  : "text-zinc-600 hover:text-black"
               )}
             >
               {link.name}
@@ -56,7 +56,7 @@ export const Header = () => {
               (location.pathname === '/dashboard' || location.pathname.startsWith('/admin')) && "text-yellow-600 fill-current"
             )} />
             {user && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-white dark:border-black" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-white" />
             )}
           </Link>
           <Link to="/favourites" className="text-zinc-600 hover:text-yellow-600 transition-all">

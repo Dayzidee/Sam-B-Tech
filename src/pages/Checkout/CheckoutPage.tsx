@@ -109,8 +109,9 @@ export const CheckoutPage = () => {
       };
       
       const newOrder = await OrderService.create(orderData as any);
-      setCreatedOrderId(newOrder.id);
-      return newOrder.id;
+      const orderId = newOrder.id || (newOrder as any)._id; // Check for ID variants
+      setCreatedOrderId(orderId);
+      return orderId;
     } catch (error) {
       console.error('Failed to create order', error);
       alert('Failed to process your order. Please try again.');
@@ -122,10 +123,16 @@ export const CheckoutPage = () => {
 
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsPaymentModalOpen(false);
+    if (isProcessing) return;
+    
     const orderId = await processOrder(true, 'web');
     if (orderId) {
+      setIsPaymentModalOpen(false);
       setIsReceiptModalOpen(true);
+      clearCart(); // Clear cart after successful order
+    } else {
+      // Keep modal open so user can try again or see error
+      setIsProcessing(false);
     }
   };
 
@@ -568,7 +575,7 @@ export const CheckoutPage = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
+              className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
               >
                 <div className="p-8 pb-4 flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -579,18 +586,18 @@ export const CheckoutPage = () => {
                   </div>
                   <button 
                     onClick={() => setIsWhatsAppReadyModalOpen(false)}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <div className="p-8 pt-4 space-y-6">
-                  <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium leading-relaxed">
+                  <p className="text-zinc-500 text-sm font-medium leading-relaxed">
                     Your order has been recorded! We've generated your receipt image. Please follow these steps to complete your checkout:
                   </p>
 
-                  <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 space-y-4">
+                  <div className="bg-zinc-50 p-4 rounded-3xl border border-zinc-100 space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Receipt Preview</span>
                       {receiptImageUrl && (
@@ -605,21 +612,21 @@ export const CheckoutPage = () => {
                       )}
                     </div>
                     {receiptImageUrl ? (
-                      <div className="aspect-[4/5] bg-white rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-inner">
+                      <div className="aspect-[4/5] bg-white rounded-2xl overflow-hidden border border-zinc-200 shadow-inner">
                         <img src={receiptImageUrl} className="w-full h-full object-contain" alt="Order Receipt" />
                       </div>
                     ) : (
-                      <div className="aspect-[4/5] bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-2xl" />
+                      <div className="aspect-[4/5] bg-zinc-200 animate-pulse rounded-2xl" />
                     )}
                   </div>
 
                   <div className="space-y-4">
                     <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                      <div className="flex-shrink-0 w-8 h-8 bg-zinc-100 rounded-full flex items-center justify-center text-sm font-bold">1</div>
                       <p className="text-sm">Click <b>"Open WhatsApp"</b> below to start the chat.</p>
                     </div>
                     <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                      <div className="flex-shrink-0 w-8 h-8 bg-zinc-100 rounded-full flex items-center justify-center text-sm font-bold">2</div>
                       <p className="text-sm"><b>Attach the receipt image</b> (download it first if on mobile) and send it.</p>
                     </div>
                   </div>
@@ -697,8 +704,19 @@ export const CheckoutPage = () => {
                       <p className="text-sm font-bold">GTBank</p>
                     </div>
                   )}
-                  <Button type="submit" className="w-full h-14 font-bold text-lg">
-                    {payment === 'card' ? `Pay ${formatCurrency(total)}` : 'I have made the transfer'}
+                  <Button 
+                    type="submit" 
+                    disabled={isProcessing}
+                    className="w-full h-14 font-bold text-lg flex items-center justify-center gap-2"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      payment === 'card' ? `Pay ${formatCurrency(total)}` : 'I have made the transfer'
+                    )}
                   </Button>
                 </form>
               </motion.div>

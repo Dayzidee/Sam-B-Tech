@@ -142,34 +142,39 @@ export const AdminOrders = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="font-headline font-black text-3xl">Orders</h1>
-          <p className="text-secondary text-sm">{orders.length} total order{orders.length !== 1 ? 's' : ''}</p>
+          <h1 className="font-headline font-black text-3xl text-zinc-900 tracking-tight">Orders</h1>
+          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em]">{orders.length} TOTAL TRANSACTIONS</p>
         </div>
-        <Button variant="outline" className="flex items-center gap-2" onClick={fetchOrders}>
+        <Button 
+          variant="outline" 
+          className="h-11 rounded-2xl border-zinc-200 text-zinc-600 hover:bg-zinc-50 px-6 font-bold flex items-center gap-2" 
+          onClick={fetchOrders}
+        >
           <FileText className="w-4 h-4" /> Refresh
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Order List */}
         <div className={cn(
-          "bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden flex flex-col",
+          "bg-white/70 backdrop-blur-2xl rounded-3xl shadow-sm border border-white/50 overflow-hidden flex flex-col transition-all duration-500",
           selectedOrder ? "lg:col-span-2" : "lg:col-span-3"
         )}>
-          <div className="p-4 border-b border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="p-5 border-b border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="relative w-full max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input
-                className="pl-10 h-10"
-                placeholder="Search orders by ID or customer..."
+                className="pl-11 h-11 bg-zinc-50/50 border-zinc-200/50 focus:bg-white rounded-2xl text-sm"
+                placeholder="Search by ID or customer..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
             <select
-              className="h-10 px-3 rounded-lg border border-outline-variant bg-surface text-sm font-bold text-secondary focus:outline-none"
+              className="h-11 px-4 rounded-2xl border border-zinc-200/50 bg-zinc-50/50 text-sm font-black text-zinc-600 focus:bg-white focus:outline-none w-full md:w-auto appearance-none pr-10 cursor-pointer hover:bg-zinc-100/50 transition-colors"
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
+              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23a1a1aa\' stroke-width=\'2\'%3E%3Cpath d=\'m19 9-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1rem' }}
             >
               <option>All Statuses</option>
               <option>Processing</option>
@@ -183,28 +188,31 @@ export const AdminOrders = () => {
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-surface-container-low text-secondary text-xs uppercase tracking-widest">
-                  <th className="p-4 font-bold">Order ID</th>
-                  <th className="p-4 font-bold">Customer</th>
-                  <th className="p-4 font-bold">Date</th>
-                  <th className="p-4 font-bold">Total</th>
-                  <th className="p-4 font-bold">Status</th>
-                  <th className="p-4 font-bold text-right">Action</th>
+                <tr className="bg-zinc-50/50 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em] text-nowrap border-b border-zinc-100">
+                  <th className="p-5 font-black uppercase tracking-widest">Order Reference</th>
+                  <th className="p-5 font-black uppercase tracking-widest">Customer Details</th>
+                  <th className="p-5 font-black uppercase tracking-widest">Transaction Date</th>
+                  <th className="p-5 font-black uppercase tracking-widest">Value</th>
+                  <th className="p-5 font-black uppercase tracking-widest">Status</th>
+                  <th className="p-5 font-black uppercase tracking-widest text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/20">
+              <tbody className="divide-y divide-zinc-100">
                 {isLoading ? (
                   <tr>
                     <td colSpan={6} className="p-20 text-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                      <p className="text-secondary font-bold">Loading orders...</p>
+                      <Loader2 className="w-10 h-10 animate-spin text-zinc-200 mx-auto mb-4" />
+                      <p className="text-zinc-400 font-bold uppercase tracking-widest text-[10px]">Synchronizing Orders...</p>
                     </td>
                   </tr>
                 ) : filteredOrders.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-20 text-center">
-                      <Clock className="w-10 h-10 text-outline-variant mx-auto mb-2 opacity-20" />
-                      <p className="text-sm text-secondary font-bold">No orders found.</p>
+                      <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-zinc-100 text-zinc-300">
+                        <Clock className="w-8 h-8" />
+                      </div>
+                      <p className="text-zinc-900 font-bold text-lg">No orders found</p>
+                      <p className="text-zinc-400 text-sm mt-1">Check back later for new transactions</p>
                     </td>
                   </tr>
                 ) : (
@@ -212,29 +220,43 @@ export const AdminOrders = () => {
                     <tr 
                       key={order.id} 
                       className={cn(
-                        "hover:bg-surface-container-low/50 transition-colors cursor-pointer",
-                        selectedOrder?.id === order.id ? "bg-primary-container/10" : ""
+                        "group hover:bg-zinc-50/50 transition-colors cursor-pointer",
+                        selectedOrder?.id === order.id ? "bg-zinc-100/50 shadow-inner" : ""
                       )}
                       onClick={() => setSelectedOrder(order)}
                     >
-                      <td className="p-4 font-bold text-xs font-mono">{order.id?.slice(0, 8)}...</td>
-                      <td className="p-4 text-sm">{order.customerName || 'N/A'}</td>
-                      <td className="p-4 text-sm text-secondary">{formatDate(order.createdAt)}</td>
-                      <td className="p-4 font-bold text-sm">{formatCurrency(order.total || 0)}</td>
-                      <td className="p-4">
-                        <div className="flex flex-col gap-1">
-                          <span className={cn("px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-center", getStatusColor(order.status))}>
+                      <td className="p-5">
+                        <span className="font-mono text-zinc-400 text-[11px] font-bold tracking-tighter bg-zinc-100 px-2.5 py-1 rounded-lg border border-zinc-200/50">
+                          #{order.id?.slice(0, 8).toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="p-5">
+                        <p className="font-bold text-zinc-900 text-sm tracking-tight">{order.customerName || 'Anonymous Customer'}</p>
+                        <p className="text-[10px] text-zinc-400 font-medium">{order.customerEmail || 'Guest Account'}</p>
+                      </td>
+                      <td className="p-5 text-sm font-medium text-zinc-500">{formatDate(order.createdAt)}</td>
+                      <td className="p-5 font-black text-zinc-900 text-sm">{formatCurrency(order.total || 0)}</td>
+                      <td className="p-5">
+                        <div className="flex flex-col gap-1.5 items-start">
+                          <span className={cn(
+                            "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest text-center shadow-sm border",
+                            order.status === 'Delivered' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                            order.status === 'Cancelled' ? "bg-red-50 text-red-600 border-red-100" :
+                            order.status === 'Processing' ? "bg-amber-50 text-amber-600 border-amber-100" :
+                            "bg-zinc-100 text-zinc-600 border-zinc-200"
+                          )}>
                             {order.status}
                           </span>
                           {order.orderSource === 'whatsapp' && (
-                            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter text-center border border-green-200">
-                              WhatsApp Order
+                            <span className="bg-green-50 text-green-600 px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border border-green-100 inline-flex items-center gap-1">
+                              <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
+                              WhatsApp
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="p-4 text-right">
-                        <button className="p-2 text-primary hover:bg-primary-container/20 rounded-lg transition-colors">
+                      <td className="p-5 text-right">
+                        <button className="p-3 text-zinc-400 group-hover:text-zinc-900 group-hover:bg-white rounded-2xl transition-all shadow-sm group-hover:shadow-md">
                           <Eye className="w-4 h-4" />
                         </button>
                       </td>
@@ -247,38 +269,49 @@ export const AdminOrders = () => {
         </div>
 
         {/* Order Details Panel */}
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {selectedOrder && (
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col h-full"
+              layout
+              initial={{ opacity: 0, scale: 0.95, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.95, x: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-white/80 backdrop-blur-3xl rounded-3xl shadow-xl border border-white/60 flex flex-col h-[calc(100vh-280px)] sticky top-6 overflow-hidden"
             >
-              <div className="p-6 border-b border-outline-variant/30 flex justify-between items-center">
+              <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/30">
                 <div>
-                  <h2 className="font-headline font-bold text-xl">Order Details</h2>
-                  <p className="text-sm text-secondary font-mono mt-1">{selectedOrder.id?.slice(0, 12)}...</p>
+                  <h2 className="font-headline font-black text-xl text-zinc-900 tracking-tight">Voucher Details</h2>
+                  <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest mt-1">REF: {selectedOrder.id?.toUpperCase()}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={handleDeleteOrder} disabled={isDeleting} className="p-2 text-red-500 hover:bg-red-500/10 rounded-full transition-colors" title="Delete Order">
+                  <button 
+                    onClick={handleDeleteOrder} 
+                    disabled={isDeleting} 
+                    className="p-2.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all border border-transparent hover:border-red-100" 
+                    title="Delete Order"
+                  >
                     {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
                   </button>
-                  <button onClick={() => setSelectedOrder(null)} className="p-2 text-secondary hover:bg-surface-container-low rounded-full transition-colors">
+                  <button 
+                    onClick={() => setSelectedOrder(null)} 
+                    className="p-2.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-2xl transition-all border border-transparent hover:border-zinc-200"
+                  >
                     <XCircle className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              <div className="p-6 flex-1 overflow-y-auto space-y-6">
+              <div className="p-6 flex-1 overflow-y-auto space-y-8 scrollbar-hide">
                 {/* Status Update */}
-                <div className="bg-surface-container-low p-4 rounded-xl">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-3">Update Status</h3>
-                  <div className="flex gap-2">
+                <div className="bg-zinc-900 rounded-2xl p-5 shadow-lg shadow-zinc-200/50">
+                  <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-4">Command Logistics</h3>
+                  <div className="flex flex-col gap-3">
                     <select
-                      className="flex-1 h-10 px-3 rounded-lg border border-outline-variant bg-surface text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full h-12 px-4 rounded-xl border border-zinc-800 bg-zinc-800 text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-white/10 transition-all cursor-pointer appearance-none"
                       value={newStatus}
                       onChange={e => setNewStatus(e.target.value)}
+                      style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23a1a1aa\' stroke-width=\'2\'%3E%3Cpath d=\'m19 9-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1rem' }}
                     >
                       <option value="Processing">Processing</option>
                       <option value="Shipped">Shipped</option>
@@ -287,87 +320,107 @@ export const AdminOrders = () => {
                       <option value="Cancelled">Cancelled</option>
                     </select>
                     <Button
-                      size="sm"
+                      className="w-full h-12 rounded-xl bg-white text-zinc-900 hover:bg-zinc-100 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-white/10"
                       onClick={handleUpdateStatus}
                       disabled={isUpdating || newStatus === selectedOrder.status}
                     >
-                      {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update'}
+                      {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Synchronize Status'}
                     </Button>
                   </div>
                 </div>
 
                 {/* Customer Info */}
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 border-b border-outline-variant/30 pb-2">Customer Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-bold">Name:</span> {selectedOrder.customerName || 'N/A'}</p>
-                    <p><span className="font-bold">Email:</span> {selectedOrder.customerEmail || 'N/A'}</p>
-                    <p><span className="font-bold">Phone:</span> {selectedOrder.customerPhone || 'N/A'}</p>
-                    <p><span className="font-bold">Address:</span> {selectedOrder.shippingAddress || 'N/A'}{selectedOrder.city ? `, ${selectedOrder.city}` : ''}</p>
-                    <p><span className="font-bold">Fulfillment:</span> {selectedOrder.fulfillmentMethod === 'pickup' ? 'In-Store Pickup' : 'Delivery'}</p>
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 border-b border-zinc-100 pb-2">Client Intelligence</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="bg-zinc-50/50 p-4 rounded-2xl border border-zinc-100 shadow-sm">
+                      <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Customer Identifier</p>
+                      <p className="font-bold text-zinc-900 text-sm">{selectedOrder.customerName || 'N/A'}</p>
+                    </div>
+                    <div className="bg-zinc-50/50 p-4 rounded-2xl border border-zinc-100 shadow-sm">
+                      <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Contact Protocol</p>
+                      <p className="font-bold text-zinc-900 text-sm truncate">{selectedOrder.customerEmail || 'N/A'}</p>
+                      <p className="text-xs text-zinc-500 font-medium mt-0.5">{selectedOrder.customerPhone || 'N/A'}</p>
+                    </div>
+                    <div className="bg-zinc-50/50 p-4 rounded-2xl border border-zinc-100 shadow-sm">
+                      <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Drop-off Coordinate</p>
+                      <p className="font-bold text-zinc-900 text-sm leading-relaxed">{selectedOrder.shippingAddress || 'N/A'}{selectedOrder.city ? `, ${selectedOrder.city}` : ''}</p>
+                      <div className="flex gap-2 mt-2">
+                        <span className="bg-zinc-100 text-zinc-600 items-center px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border border-zinc-200">
+                          {selectedOrder.fulfillmentMethod === 'pickup' ? 'IN-STORE PICKUP' : 'PLATFORM DELIVERY'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Order Items - Dynamic */}
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 border-b border-outline-variant/30 pb-2">Order Items</h3>
+                {/* Order Items */}
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 border-b border-zinc-100 pb-2">Inventory Manifest</h3>
                   <div className="space-y-3">
                     {selectedOrder.items && selectedOrder.items.length > 0 ? (
                       selectedOrder.items.map((item, idx) => (
-                        <div key={idx} className="flex justify-between items-center text-sm">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-surface-container-highest rounded-lg overflow-hidden flex items-center justify-center shrink-0">
+                        <div key={idx} className="flex justify-between items-center bg-zinc-50/50 p-3 rounded-2xl border border-zinc-100 shadow-sm group/item">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-white rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-zinc-200 shadow-sm group-hover/item:scale-105 transition-transform">
                               {item.image ? (
                                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                               ) : (
-                                <Package className="w-5 h-5 text-secondary" />
+                                <Package className="w-5 h-5 text-zinc-300" />
                               )}
                             </div>
                             <div>
-                              <p className="font-bold">{item.name}</p>
-                              <p className="text-xs text-secondary">Qty: {item.quantity} • {item.category || 'N/A'}</p>
+                              <p className="font-bold text-zinc-900 text-sm tracking-tight">{item.name}</p>
+                              <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest mt-0.5">
+                                QTY: {item.quantity} • {item.category || 'GENERAL'}
+                              </p>
                             </div>
                           </div>
-                          <p className="font-bold">{formatCurrency(item.price * item.quantity)}</p>
+                          <p className="font-black text-zinc-900 text-sm">{formatCurrency(item.price * item.quantity)}</p>
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-secondary italic">No items in this order.</p>
+                      <div className="p-6 text-center bg-zinc-50 rounded-2xl border border-dashed border-zinc-200">
+                        <Package className="w-8 h-8 text-zinc-200 mx-auto mb-2" />
+                        <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">MANIFEST EMPTY</p>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Payment Summary */}
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 border-b border-outline-variant/30 pb-2">Payment Summary</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between text-secondary">
-                      <span>Subtotal</span>
-                      <span>{formatCurrency(selectedOrder.subtotal || 0)}</span>
+                {/* Total Recap */}
+                <div className="space-y-4 pb-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 border-b border-zinc-100 pb-2">Financial Summary</h3>
+                  <div className="bg-zinc-50/50 rounded-2xl p-5 border border-zinc-100 space-y-3">
+                    <div className="flex justify-between items-center text-zinc-500 font-medium">
+                      <span className="text-[11px] uppercase tracking-widest">Valuation</span>
+                      <span className="text-sm">{formatCurrency(selectedOrder.subtotal || 0)}</span>
                     </div>
-                    <div className="flex justify-between text-secondary">
-                      <span>Shipping</span>
-                      <span>{formatCurrency(selectedOrder.shippingFee || 0)}</span>
+                    <div className="flex justify-between items-center text-zinc-500 font-medium">
+                      <span className="text-[11px] uppercase tracking-widest">Logistics</span>
+                      <span className="text-sm">{formatCurrency(selectedOrder.shippingFee || 0)}</span>
                     </div>
                     {(selectedOrder.vat || 0) > 0 && (
-                      <div className="flex justify-between text-secondary">
-                        <span>VAT</span>
-                        <span>{formatCurrency(selectedOrder.vat)}</span>
+                      <div className="flex justify-between items-center text-zinc-500 font-medium">
+                        <span className="text-[11px] uppercase tracking-widest">Fiscal Duty (VAT)</span>
+                        <span className="text-sm">{formatCurrency(selectedOrder.vat)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between font-bold text-base pt-2 border-t border-outline-variant/30 mt-2">
-                      <span>Total</span>
-                      <span>{formatCurrency(selectedOrder.total || 0)}</span>
+                    <div className="flex justify-between items-center pt-4 border-t border-zinc-200 mt-2">
+                        <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-900">Final Settlement</span>
+                        <span className="text-xl font-black text-zinc-900">{formatCurrency(selectedOrder.total || 0)}</span>
                     </div>
+                    
                     <div className={cn(
-                      "mt-4 p-3 rounded-lg flex items-center gap-2 text-sm font-bold",
-                      selectedOrder.paymentMethod === 'whatsapp' ? "bg-green-50 text-green-800" : "bg-blue-50 text-blue-800"
+                      "mt-6 p-4 rounded-2xl flex items-center gap-3 text-[10px] font-black uppercase tracking-widest border shadow-sm",
+                      selectedOrder.paymentMethod === 'whatsapp' ? "bg-green-50 text-green-600 border-green-100" : "bg-blue-50 text-blue-600 border-blue-100"
                     )}>
-                      <CheckCircle className="w-4 h-4" />
-                      {selectedOrder.paymentMethod === 'card' ? 'Paid via Card' :
-                       selectedOrder.paymentMethod === 'transfer' ? 'Paid via Transfer' :
-                       selectedOrder.paymentMethod === 'pod' ? 'Pay on Delivery' : 
-                       selectedOrder.paymentMethod === 'whatsapp' ? 'WhatsApp Checkout' : 'Payment Method N/A'}
+                      {selectedOrder.paymentMethod === 'card' ? <CheckCircle className="w-4 h-4" /> : 
+                       selectedOrder.paymentMethod === 'whatsapp' ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                      {selectedOrder.paymentMethod === 'card' ? 'DIGITAL TRANSACTION (CARD)' :
+                       selectedOrder.paymentMethod === 'transfer' ? 'DIRECT SETTLEMENT (TRANSFER)' :
+                       selectedOrder.paymentMethod === 'pod' ? 'SETTLEMENT ON ARRIVAL' : 
+                       selectedOrder.paymentMethod === 'whatsapp' ? 'WHATSAPP DIRECT CHECKOUT' : 'SETTLEMENT PROTOCOL N/A'}
                     </div>
                   </div>
                 </div>

@@ -2,8 +2,8 @@ import { Category } from '@/types';
 import { cn } from '@/utils';
 
 interface FilterSidebarProps {
-  selectedCondition: 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned';
-  onConditionChange: (condition: 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned') => void;
+  selectedCondition: 'ALL' | 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned';
+  onConditionChange: (condition: 'ALL' | 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned') => void;
   selectedCategories: Category[];
   onCategoryToggle: (category: Category) => void;
 }
@@ -28,14 +28,16 @@ export const FilterSidebar = ({
   return (
     <aside className="space-y-8">
       {/* Condition Toggle */}
-      <div className="p-1 bg-surface-container rounded-xl flex flex-wrap gap-1">
-        {(['Brand New', 'UK Used', 'Refurbished', 'Pre-owned'] as const).map((cond) => (
+      <div className="p-1.5 bg-zinc-100/50 rounded-2xl flex flex-wrap gap-1.5 border border-zinc-200/50">
+        {(['ALL', 'Brand New', 'UK Used', 'Refurbished', 'Pre-owned'] as const).map((cond) => (
           <button 
             key={cond}
             onClick={() => onConditionChange(cond)}
             className={cn(
-              "flex-1 min-w-[45%] py-2.5 px-3 rounded-lg text-[10px] md:text-xs font-bold transition-all whitespace-nowrap",
-              selectedCondition === cond ? "bg-white text-on-background shadow-sm" : "text-secondary hover:text-on-background"
+              "flex-1 min-w-[30%] py-2.5 px-3 rounded-xl text-[10px] md:text-xs font-bold transition-all whitespace-nowrap",
+              selectedCondition === cond 
+                ? "bg-white text-zinc-900 shadow-sm border border-zinc-200" 
+                : "text-zinc-500 hover:text-zinc-900 hover:bg-white/50"
             )}
           >
             {cond}
