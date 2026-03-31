@@ -1,92 +1,90 @@
-import { useState } from 'react';
-import { ChevronDown, SlidersHorizontal, X, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronDown, SlidersHorizontal, X, Search, Loader2 } from 'lucide-react';
 import { FilterSidebar } from '@/components/shared/FilterSidebar';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { Product, Category } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils';
+import { ProductService } from '@/backend/services/firestore.service';
 import { motion, AnimatePresence } from 'motion/react';
-
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: '1',
-    name: 'iPhone 15 Pro Max 256GB',
-    brand: 'Apple',
-    price: 1250000,
-    oldPrice: 1400000,
-    rating: 4.9,
-    reviews: 42,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC5j8UkmKkIYpVBQTfTdhdaRA0eWoH3Ir6YPmpdOeKqLIEzLhln8BHIboEfZtaINkV0O1N3J8X2MN-GvcwC6-cyH6bCh7wNaRcrwvG9bouHCid1ahhi-HFwZlObCEiqw4gQ7kF-UxofYsDOA8Tp7iYMi1PLoRsAA-eayFKi-wrHKCHhOeIA4qajLIx_fmjc8lucJJ1X3D-5P2wJ8IYlA2WfWBM6Z1dlP0laCg2tiOv2AM0Jdqam5wYeZ7NPCBOatCQPWhvpVhmy68s',
-    condition: 'UK Used',
-    isSale: true,
-    category: 'Smartphones'
-  },
-  {
-    id: '2',
-    name: 'MacBook Air M2 13-inch',
-    brand: 'Apple',
-    price: 950000,
-    rating: 5.0,
-    reviews: 18,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC81-aDTX0JmKe6iIDFlgCtKhLj0X_kle6nyruah3bHXLIX6cK47COFFWJxq-wgFD4y08uE-bpPSja20cSz3sE2ByR2js-18svCrkmpkCQ8jTXlSvrXfufFluMyW0jN2ac1WXSiolnsZGtW0Q3vo5euSru4C0bJLw53-CdnolLneDY8xywR9ITwkNXzByznyPJDhc9icpKGiCyxt0Dc3KHY_MI9mv2Q-y2yOXtXZe5c3Fy1oaFGw2nm8KmDqMXgE9BqB7ebAItFVRM',
-    condition: 'Brand New',
-    category: 'Laptops & MacBooks'
-  },
-  {
-    id: '3',
-    name: 'Galaxy S24 Ultra',
-    brand: 'Samsung',
-    price: 1100000,
-    rating: 4.8,
-    reviews: 31,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB30doA-Vx9AUOYAGC9D9hzz5wJGdhkrlY1MJADD-v6S0_KyVTUFU-H2R7QgGyjMNB-0QFx06uRYDmXtqEWekAIIO8DntpT509y_yjcQK9r9dPqLiemqNJ8AUopBzdQXdk2sBs6_4kDhbexoLisN4IbasgdYZyE-YPlQhDNor_vqGxG4A1bh1e7cjD7ERXhs0GB1HWa3zaELVeMbdMGCQIypf4W38ff40LoudluRizJ9QqoJ09OZO8-B-ggxRC8lHW-nBYoOEJmmzA',
-    condition: 'UK Used',
-    category: 'Smartphones'
-  },
-  {
-    id: '4',
-    name: 'iPad Pro 11-inch M2',
-    brand: 'Apple',
-    price: 650000,
-    rating: 4.9,
-    reviews: 27,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAps0_HN89vCEp62ak-GWEJYIp5GB42Fgk0AkAl0CeY1b2lIAxyUj3SXXq8LOMXi8NpbzyovkuQmKR9ox4uPQiw5eFIshzDq-AgWH3nmTJnKI_UPXlz5NZcqSMjmdDO6Fxh6SEuixhHQAwbCWJaV2d85JuVWQMDWvGSaj4UhJS9wRimWDe6JY3P-3SCdvtcgEcu_1m5MMOjjrvoDPBqBzE4oiY8EyRe78Nvzij7OjDrK5n_gYJakp6WHX3kqc1hWnM7FVq4Eict7jA',
-    condition: 'Brand New',
-    category: 'Tablets & iPads'
-  },
-  {
-    id: '5',
-    name: 'Sony WH-1000XM5 ANC',
-    brand: 'Sony',
-    price: 320000,
-    oldPrice: 380000,
-    rating: 4.7,
-    reviews: 89,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAKR8vN-GEru-kRowKay28xgo1LCs0TH-VZLFVHCWZwo1xgtlpn07edJIoRChpO_QXIThKHNPZBf06yaa9UIEp3iV5uWfLDc3wTGsiyQ5Yw_Qvcoa7aNVvvJ9xiQSjhhRsB5fiOpZN0nA_fFpcnKuEzUHuFZpDs-p6EDFncm9ouORkq2IjzIDijqDjLEdNNBiXgujct2hxgKJ5YzIJnUOMVCZwPiCMAuNWMO1nMRLdGBTezBWDlX_S7T-0HbKRM8oxKv7a41FcUHH4',
-    condition: 'UK Used',
-    isSale: true,
-    category: 'Accessories'
-  }
-];
+// Dynamic products fetched from Firebase
 
 export const GadgetsPage = () => {
-  const [condition, setCondition] = useState<'Brand New' | 'UK Used'>('Brand New');
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>(['Smartphones']);
+  const [condition, setCondition] = useState<'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned'>('Brand New');
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>(['ALL']);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('Latest Arrivals');
+
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const firestoreProducts = await ProductService.getAll();
+        const mappedProducts = firestoreProducts.map(p => ({
+          id: p.id || '',
+          name: p.name,
+          brand: p.category, // Defaulting to category if brand is missing
+          price: p.price,
+          oldPrice: p.discountPrice,
+          rating: 4.8, // Mock as it's not in db yet
+          reviews: Math.floor(Math.random() * 50) + 10,
+          image: p.images?.[0] || 'https://via.placeholder.com/300',
+          condition: (p.condition || 'Brand New') as 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned',
+          category: p.category,
+          isSale: !!p.discountPrice,
+          createdAt: p.createdAt?.toDate?.() || new Date(p.createdAt || 0)
+        }));
+        setProducts(mappedProducts);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const handleCategoryToggle = (cat: Category) => {
-    setSelectedCategories(prev => 
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-    );
+    if (cat === 'ALL') {
+      setSelectedCategories(['ALL']);
+      return;
+    }
+    
+    setSelectedCategories(prev => {
+      const withoutAll = prev.filter(c => c !== 'ALL');
+      if (withoutAll.includes(cat)) {
+        const newSelection = withoutAll.filter(c => c !== cat);
+        return newSelection.length === 0 ? ['ALL'] : newSelection;
+      }
+      return [...withoutAll, cat];
+    });
   };
 
-  const filteredProducts = MOCK_PRODUCTS.filter(p => {
+  const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.brand.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCondition = p.condition === condition;
-    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(p.category as Category);
+    const matchesCategory = selectedCategories.includes('ALL') || selectedCategories.length === 0 || selectedCategories.includes(p.category as Category);
     return matchesSearch && matchesCondition && matchesCategory;
+  });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case 'Price: Low to High':
+        return a.price - b.price;
+      case 'Price: High to Low':
+        return b.price - a.price;
+      case 'Popularity':
+        return (b.reviews || 0) - (a.reviews || 0);
+      case 'Latest Arrivals':
+      default:
+        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt || 0);
+        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt || 0);
+        return dateB.getTime() - dateA.getTime();
+    }
   });
 
   return (
@@ -170,17 +168,21 @@ export const GadgetsPage = () => {
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-10 gap-4">
             <div className="hidden md:block">
-              <p className="text-secondary text-xs font-bold uppercase tracking-widest">Showing {filteredProducts.length} results</p>
+              <p className="text-secondary text-xs font-bold uppercase tracking-widest">Showing {sortedProducts.length} results</p>
             </div>
             
             <div className="flex items-center bg-zinc-50 border border-zinc-100 px-4 py-2.5 rounded-xl w-full sm:w-auto">
               <span className="text-[10px] font-black text-secondary mr-3 uppercase tracking-widest">Sort by</span>
               <div className="relative flex items-center flex-1 sm:flex-none">
-                <select className="bg-transparent border-none text-xs font-black focus:ring-0 p-0 pr-8 cursor-pointer appearance-none w-full uppercase tracking-tighter">
-                  <option>Latest Arrivals</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Popularity</option>
+                <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent border-none text-xs font-bold focus:ring-0 p-0 pr-8 cursor-pointer appearance-none w-full uppercase tracking-widest outline-none"
+                >
+                  <option value="Latest Arrivals">Latest Arrivals</option>
+                  <option value="Price: Low to High">Price: Low to High</option>
+                  <option value="Price: High to Low">Price: High to Low</option>
+                  <option value="Popularity">Popularity</option>
                 </select>
                 <ChevronDown className="w-4 h-4 absolute right-0 pointer-events-none text-zinc-400" />
               </div>
@@ -188,11 +190,22 @@ export const GadgetsPage = () => {
           </div>
 
           {/* Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-12">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-12">
+              {sortedProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+              {sortedProducts.length === 0 && (
+                <div className="col-span-full py-20 text-center text-secondary">
+                  No products found matching your active filters.
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Load More */}
           <div className="mt-12 md:mt-20 flex justify-center">

@@ -24,6 +24,9 @@ import {
   Globe,
   Trophy
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { collection, query, limit, getDocs, orderBy } from 'firebase/firestore';
+import { db } from './backend/config/firebase';
 import { motion } from 'motion/react';
 
 const Navbar = () => (
@@ -179,53 +182,63 @@ const DealCard = ({ title, price, oldPrice, tag, image, desc }: any) => (
   </motion.div>
 );
 
-const TrendingDeals = () => (
-  <section className="max-w-screen-2xl mx-auto px-6 mb-24">
-    <div className="flex justify-between items-end mb-10">
-      <div>
-        <h2 className="text-4xl font-black tracking-tighter mb-2">Trending Deals</h2>
-        <p className="text-secondary">Limited time offers on top-tier gadgets.</p>
+const TrendingDeals = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const q = query(collection(db, 'products'));
+        const querySnapshot = await getDocs(q);
+        const fetchedProducts = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        console.log("FETCHED PRODUCTS:", fetchedProducts);
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) return (
+    <section className="max-w-screen-2xl mx-auto px-6 mb-24 flex justify-center py-12">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </section>
+  );
+
+  return (
+    <section className="max-w-screen-2xl mx-auto px-6 mb-24">
+      <div className="flex justify-between items-end mb-10">
+        <div>
+          <h2 className="text-4xl font-black tracking-tighter mb-2">Trending Deals</h2>
+          <p className="text-secondary">Limited time offers on top-tier gadgets.</p>
+        </div>
+        <a className="text-primary font-bold flex items-center gap-2 hover:underline" href="/shop">
+          View All <ArrowRight className="w-4 h-4" />
+        </a>
       </div>
-      <a className="text-primary font-bold flex items-center gap-2 hover:underline" href="#">
-        View All <ArrowRight className="w-4 h-4" />
-      </a>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <DealCard 
-        title="iPhone 14 Pro Max" 
-        price="₦650,000" 
-        oldPrice="₦765,000" 
-        tag="15% OFF" 
-        desc="UK Used - Grade A+"
-        image="https://lh3.googleusercontent.com/aida-public/AB6AXuC3E4exF9RTKw1NR9VBrOmtUoF1izrlWVo29-EAQ2U-JD0Z9rtfrND5SIr0eryYH859YotCw-QgUkwvu4iXlzOpheqyE8tCKHqc-vG8XdMIgDe68B8Orx3n-TmDZdtH1tFrXL8JTtL_CAFRk9zcdbXl0505TaSBIFwyJshuY2EKKbhE-oPtIJfGxT_Ohh8XMZCH5Lbo6_Wsgzb8qyJH0wKCj22-EhhI8VFzhiRpPQttCzdytiIIDlPbhD-RntS2TuzUcnVXCqqYAKM"
-      />
-      <DealCard 
-        title="Apple Watch Series 8" 
-        price="₦320,000" 
-        oldPrice="₦380,000" 
-        tag="HOT DEAL" 
-        desc="Brand New - GPS"
-        image="https://lh3.googleusercontent.com/aida-public/AB6AXuBBYp28NFo9ImbRIFzxxFPgU4pu9Sdf2NFWcZWwqn9TPh1U0YHFZydnWuyWQ_bl4OU-gQIpKZyM1dQWwW8v3rn4UsbxYEdVUHzu3YjQ0isUvR6eZVxAplrYglfxw37ZfQJ_cHJsTnIuYwq87xvESEkb1kTj22yn1pAd04vw_644GrAL-jlb7pFySltzet7m9Ip4STsqTA-qKz5Lh3HFapOIck__rbwxtqBj1PEGa5RRdqM8kZG97OIDj63LmNHpZdKzvTthM2FiEvU"
-      />
-      <DealCard 
-        title="MacBook Pro M2" 
-        price="₦950,000" 
-        oldPrice="₦1,100,000" 
-        tag="NEW ARRIVAL" 
-        desc="8GB RAM / 256GB SSD"
-        image="https://lh3.googleusercontent.com/aida-public/AB6AXuC63IUAOIU6DzXcrWFJ3IBeI8IERRuxZZUL4wJvbWrJE6GTgEuyft_Yop9M1Laf4_8arnAvd_bDTbjZ57f_xuXL0r9DC6pyBmrZpw0Ys_Wf-g59Jl6o_JWZyGi5Ih22zNDdy9qZMEcUO4xoJVRyUZjj20OB3rXpUu4F0tJ1VpUQDk9WjKk5uOCls8QEFtUcZyr7mAT1fZoaIGxLW9paXZJJyAs7Dir1QF5_V2Kev54HdZwtsZgfJDO2hz-qMFQfQM2DPM_3W8BG_Jg"
-      />
-      <DealCard 
-        title="iPad Air (5th Gen)" 
-        price="₦420,000" 
-        oldPrice="₦525,000" 
-        tag="20% OFF" 
-        desc="Blue - 64GB WiFi"
-        image="https://lh3.googleusercontent.com/aida-public/AB6AXuAH1TjupueZz164hyHOm8FqoqPtJ0NvofggT2xOSuI-jGPLCvopX7nwcTeQM9xBNlRjqQ4BRfs3tUVwwnDMp_p3rNujfxpHmbiRFI5Ua43ulmQ4CxhfvcCcgfR_pGWv2cewIy2N8R1CXwNkG_Oz8lYSOU66VRiky19KMHVJCm_el36_LiaY7l8rEXJtqO1A0aBkmEvlinNSLhGpqb1wrrM3uEfLy6BBtN6t1vL-MnF3NxdArhWs2reQn7qynz1XCXxnvzuT-mTGKtE"
-      />
-    </div>
-  </section>
-);
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <DealCard 
+            key={product.id}
+            title={product.name} 
+            price={`₦${product.price.toLocaleString()}`} 
+            oldPrice={product.discountPrice ? `₦${product.discountPrice.toLocaleString()}` : undefined} 
+            tag={product.condition} 
+            desc={product.category}
+            image={product.images[0]}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
 
 const AboutSection = () => (
   <section className="max-w-screen-2xl mx-auto px-6 mb-24 py-16 bg-white rounded-3xl border border-outline-variant/5">

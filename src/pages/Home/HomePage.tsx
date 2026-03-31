@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { collection, getDocs, query } from 'firebase/firestore';
+import { db } from '@/backend/config/firebase';
 import { 
   ShieldCheck, 
   BadgeCheck, 
@@ -22,8 +24,9 @@ import {
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
+import { DealService, ProductService } from '@/backend/services/firestore.service';
 
-const Hero = () => (
+const Hero = ({ deal }: { deal?: any }) => (
   <section className="relative overflow-hidden min-h-[auto] lg:min-h-[700px] flex items-center mb-12 md:mb-16 px-4 sm:px-6 pt-20 lg:pt-24 pb-10 lg:pb-0">
     <div className="max-w-screen-2xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
       <motion.div 
@@ -32,20 +35,34 @@ const Hero = () => (
         viewport={{ once: true }}
         className="z-10 order-2 lg:order-1 text-center lg:text-left"
       >
-        <span className="inline-block px-4 py-1 bg-primary-container text-on-primary-fixed text-[10px] md:text-xs font-bold tracking-widest uppercase mb-4 rounded-sm">Featured Launch</span>
+        <span className="inline-block px-4 py-1 bg-primary-container text-on-primary-fixed text-[10px] md:text-xs font-bold tracking-widest uppercase mb-4 rounded-sm">
+          {deal ? 'Deal of the Day' : 'Featured Launch'}
+        </span>
         <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tighter leading-[1.1] mb-4 md:mb-6">
-          Premium Tech, <br className="hidden sm:block"/>
-          <span className="text-primary-container">Unbeatable Prices</span>
+          {deal ? (
+            <>
+              {deal.productName.split(' ').slice(0, 2).join(' ')} <br className="hidden sm:block"/>
+              <span className="text-primary-container">Special Offer</span>
+            </>
+          ) : (
+            <>
+              Premium Tech, <br className="hidden sm:block"/>
+              <span className="text-primary-container">Unbeatable Prices</span>
+            </>
+          )}
         </h1>
         <p className="text-sm sm:text-lg text-secondary mb-8 md:mb-10 max-w-md mx-auto lg:mx-0 leading-relaxed px-2 sm:px-0">
-          The ultimate destination for the latest iPhones, MacBooks, and high-end gadgets. Hand-curated quality for the modern professional.
+          {deal 
+            ? `Exclusive price on ${deal.productName}. Was ₦${deal.originalPrice.toLocaleString()}, now only ₦${deal.dealPrice.toLocaleString()}. Don't miss out!`
+            : "The ultimate destination for the latest iPhones, MacBooks, and high-end gadgets. Hand-curated quality for the modern professional."
+          }
         </p>
         <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 md:gap-4">
-          <Link to="/gadgets" className="w-full sm:w-auto">
-            <Button size="lg" className="px-8 w-full">Shop Now</Button>
+          <Link to={deal ? `/product/${deal.id}` : "/gadgets"} className="w-full sm:w-auto">
+            <Button size="lg" className="px-8 w-full">{deal ? 'Grab Deal' : 'Shop Now'}</Button>
           </Link>
           <Link to="/sales" className="w-full sm:w-auto">
-            <Button variant="outline" size="lg" className="px-8 w-full sm:w-auto">View Deals</Button>
+            <Button variant="outline" size="lg" className="px-8 w-full sm:w-auto">View All Deals</Button>
           </Link>
         </div>
       </motion.div>
@@ -55,18 +72,18 @@ const Hero = () => (
             initial={{ rotate: 0, y: 20, opacity: 0 }}
             animate={{ rotate: 6, y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            alt="iPhone showcase" 
-            className="absolute top-0 right-0 w-2/3 rounded-[1.5rem] md:rounded-[3rem] shadow-2xl z-20 border-2 md:border-8 border-black" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdjRuQfQnNMiMnfvwUOmakAtXAI4OnuHTodAP2PbrXqof34aGDtblaiX5o4kKxlhC5bc9OsTvqiv5SjYsmaCZgWU4lYEbVV5ho4b10FUXuTnVj0NhqqUzouLVorKT8RYmJZVao3znSX6GOzU66P-kiKD1QpO_MeZgH_ZRFqMe3Ha7ejPBNjg8khPcdZLNaxKuXrtpJf60fHXbIkqbrgd17wHCRLWc305D2J0LR3HButNjyGFvqrBPGycNM2BXft8L-gDMe5hwAt4I"
+            alt="Product showcase" 
+            className="absolute top-0 right-0 w-2/3 rounded-[1.5rem] md:rounded-[3rem] shadow-2xl z-20 border-2 md:border-8 border-black aspect-[3/4] object-cover" 
+            src={deal?.image || "https://lh3.googleusercontent.com/aida-public/AB6AXuDdjRuQfQnNMiMnfvwUOmakAtXAI4OnuHTodAP2PbrXqof34aGDtblaiX5o4kKxlhC5bc9OsTvqiv5SjYsmaCZgWU4lYEbVV5ho4b10FUXuTnVj0NhqqUzouLVorKT8RYmJZVao3znSX6GOzU66P-kiKD1QpO_MeZgH_ZRFqMe3Ha7ejPBNjg8khPcdZLNaxKuXrtpJf60fHXbIkqbrgd17wHCRLWc305D2J0LR3HButNjyGFvqrBPGycNM2BXft8L-gDMe5hwAt4I"}
             referrerPolicy="no-referrer"
           />
           <motion.img 
             initial={{ rotate: 0, y: 20, opacity: 0 }}
             animate={{ rotate: -12, y: 0, opacity: 0.9 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            alt="iPhone secondary" 
-            className="absolute bottom-10 left-0 w-2/3 rounded-[1.5rem] md:rounded-[3rem] shadow-xl z-10 border-2 md:border-8 border-zinc-800" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8uNs9jNGZn4hLMupRiNXuuaNAjl6U0GxmH-Mfi1T94hpuV1CdcycM4qOkSwOMP0WoX_BgmvGgweu0buHXlQ1pm80aBtxcFmCpqSEBd731IghJWoGbVzteJ6mzD43QVonlCdRZsx-p5utQs_q6CktExTSpUBCBbFqrUZAljE8-I2FFWtRlBWk-x-lWTZ8za0_5erDlfeG83Cs2tigPNGrXUumeeUeTbiHZCdExALt_yfmBmRe-_gnyJH5X0tbN5-IX-ySZXMpZ_nY"
+            alt="Secondary showcase" 
+            className="absolute bottom-10 left-0 w-2/3 rounded-[1.5rem] md:rounded-[3rem] shadow-xl z-10 border-2 md:border-8 border-zinc-800 aspect-[3/4] object-cover" 
+            src={deal?.image || "https://lh3.googleusercontent.com/aida-public/AB6AXuC8uNs9jNGZn4hLMupRiNXuuaNAjl6U0GxmH-Mfi1T94hpuV1CdcycM4qOkSwOMP0WoX_BgmvGgweu0buHXlQ1pm80aBtxcFmCpqSEBd731IghJWoGbVzteJ6mzD43QVonlCdRZsx-p5utQs_q6CktExTSpUBCBbFqrUZAljE8-I2FFWtRlBWk-x-lWTZ8za0_5erDlfeG83Cs2tigPNGrXUumeeUeTbiHZCdExALt_yfmBmRe-_gnyJH5X0tbN5-IX-ySZXMpZ_nY"}
             referrerPolicy="no-referrer"
           />
         </div>
@@ -78,10 +95,15 @@ const Hero = () => (
         >
           <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
             <Star className="w-3 h-3 md:w-5 md:h-5 text-primary-container fill-primary-container" />
-            <span className="font-bold text-[9px] md:text-sm tracking-tight">Women-Owned Tech Hub</span>
+            <span className="font-bold text-[9px] md:text-sm tracking-tight">
+              {deal ? 'Limited Time Offer' : 'Women-Owned Tech Hub'}
+            </span>
           </div>
           <p className="text-[8px] md:text-xs text-secondary leading-tight md:leading-normal">
-            Proudly serving Ikorodu with certified devices and same-day kerbside pickup.
+            {deal 
+              ? `Offer ends on ${new Date(deal.endDate).toLocaleDateString()}. Grab yours before it's gone!`
+              : "Proudly serving Ikorodu with certified devices and same-day kerbside pickup."
+            }
           </p>
         </motion.div>
       </div>
@@ -91,6 +113,7 @@ const Hero = () => (
 );
 
 const TrustStrip = () => (
+  // ... (unchanged)
   <section className="bg-surface-container-low py-8 md:py-10 mb-16 md:mb-20 border-y border-outline-variant/5">
     <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
@@ -115,43 +138,141 @@ const TrustStrip = () => (
   </section>
 );
 
-const TrendingDeals = () => (
-  <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 mb-24">
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
-      <div>
-        <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">Trending Deals</h2>
-        <p className="text-secondary text-sm md:text-base">Limited time offers on top-tier gadgets.</p>
-      </div>
-      <Link to="/gadgets" className="text-primary font-bold flex items-center gap-2 hover:underline text-sm md:text-base">
-        View All <ArrowRight className="w-4 h-4" />
-      </Link>
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-      {[
-        { id: 1, name: "iPhone 14 Pro Max", brand: "APPLE", price: 650000, oldPrice: 765000, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC3E4exF9RTKw1NR9VBrOmtUoF1izrlWVo29-EAQ2U-JD0Z9rtfrND5SIr0eryYH859YotCw-QgUkwvu4iXlzOpheqyE8tCKHqc-vG8XdMIgDe68B8Orx3n-TmDZdtH1tFrXL8JTtL_CAFRk9zcdbXl0505TaSBIFwyJshuY2EKKbhE-oPtIJfGxT_Ohh8XMZCH5Lbo6_Wsgzb8qyJH0wKCj22-EhhI8VFzhiRpPQttCzdytiIIDlPbhD-RntS2TuzUcnVXCqqYAKM", tag: "15% OFF" },
-        { id: 2, name: "Apple Watch Series 8", brand: "APPLE", price: 320000, oldPrice: 380000, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBBYp28NFo9ImbRIFzxxFPgU4pu9Sdf2NFWcZWwqn9TPh1U0YHFZydnWuyWQ_bl4OU-gQIpKZyM1dQWwW8v3rn4UsbxYEdVUHzu3YjQ0isUvR6eZVxAplrYglfxw37ZfQJ_cHJsTnIuYwq87xvESEkb1kTj22yn1pAd04vw_644GrAL-jlb7pFySltzet7m9Ip4STsqTA-qKz5Lh3HFapOIck__rbwxtqBj1PEGa5RRdqM8kZG97OIDj63LmNHpZdKzvTthM2FiEvU", tag: "HOT DEAL" },
-        { id: 3, name: "MacBook Pro M2", brand: "APPLE", price: 950000, oldPrice: 1100000, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC63IUAOIU6DzXcrWFJ3IBeI8IERRuxZZUL4wJvbWrJE6GTgEuyft_Yop9M1Laf4_8arnAvd_bDTbjZ57f_xuXL0r9DC6pyBmrZpw0Ys_Wf-g59Jl6o_JWZyGi5Ih22zNDdy9qZMEcUO4xoJVRyUZjj20OB3rXpUu4F0tJ1VpUQDk9WjKk5uOCls8QEFtUcZyr7mAT1fZoaIGxLW9paXZJJyAs7Dir1QF5_V2Kev54HdZwtsZgfJDO2hz-qMFQfQM2DPM_3W8BG_Jg", tag: "NEW ARRIVAL" },
-        { id: 4, name: "iPad Air (5th Gen)", brand: "APPLE", price: 420000, oldPrice: 525000, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAH1TjupueZz164hyHOm8FqoqPtJ0NvofggT2xOSuI-jGPLCvopX7nwcTeQM9xBNlRjqQ4BRfs3tUVwwnDMp_p3rNujfxpHmbiRFI5Ua43ulmQ4CxhfvcCcgfR_pGWv2cewIy2N8R1CXwNkG_Oz8lYSOU66VRiky19KMHVJCm_el36_LiaY7l8rEXJtqO1A0aBkmEvlinNSLhGpqb1wrrM3uEfLy6BBtN6t1vL-MnF3NxdArhWs2reQn7qynz1XCXxnvzuT-mTGKtE", tag: "20% OFF" }
-      ].map((product) => (
-        <div key={product.id} className="group bg-surface-container-lowest p-4 md:p-6 rounded-xl border border-outline-variant/10 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
-          <span className="absolute top-4 left-4 z-10 bg-primary-container text-on-primary-fixed text-[10px] font-bold px-3 py-1 rounded-full uppercase">{product.tag}</span>
-          <div className="aspect-square mb-4 md:mb-6 overflow-hidden flex items-center justify-center">
-            <img alt={product.name} className="w-4/5 object-contain transition-transform duration-500 group-hover:scale-110" src={product.image} referrerPolicy="no-referrer" />
-          </div>
-          <h3 className="font-bold text-base md:text-lg mb-1 line-clamp-1">{product.name}</h3>
-          <p className="text-secondary text-xs md:text-sm mb-4">{product.brand}</p>
-          <div className="flex items-center gap-2 md:gap-3">
-            <span className="text-xl md:text-2xl font-black text-on-background">₦{product.price.toLocaleString()}</span>
-            <span className="text-secondary line-through text-xs md:text-sm">₦{product.oldPrice.toLocaleString()}</span>
-          </div>
-          <button className="mt-6 w-full py-3 bg-on-background text-white font-bold rounded hover:bg-primary transition-colors flex items-center justify-center gap-2 text-sm">
-            Add to Cart
-          </button>
+const NewArrivals = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
+      try {
+        const allProducts = await ProductService.getAll();
+        // Sort by createdAt descending, take first 8
+        const sorted = allProducts
+          .sort((a, b) => {
+            const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+            return dateB.getTime() - dateA.getTime();
+          })
+          .slice(0, 8);
+        setProducts(sorted);
+      } catch (error) {
+        console.error("Error fetching new arrivals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNewArrivals();
+  }, []);
+
+  if (loading) return (
+    <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 mb-24 flex justify-center py-12">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </section>
+  );
+
+  if (products.length === 0) return null;
+
+  return (
+    <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 mb-24">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+        <div>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">New Arrivals</h2>
+          <p className="text-secondary text-sm md:text-base">The newest gadgets fresh from our inventory.</p>
         </div>
-      ))}
-    </div>
-  </section>
-);
+        <Link to="/gadgets" className="text-primary font-bold flex items-center gap-2 hover:underline text-sm md:text-base">
+          Shop All <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+        {products.map((product) => (
+          <Link to={`/product/${product.id}`} key={product.id} className="group bg-surface-container-lowest rounded-xl border border-outline-variant/10 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <div className="aspect-square p-4 md:p-6 overflow-hidden flex items-center justify-center relative">
+              <span className="absolute top-3 left-3 bg-green-100 text-green-800 text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">New</span>
+              <img
+                alt={product.name}
+                className="w-4/5 object-contain transition-transform duration-500 group-hover:scale-110"
+                src={product.images?.[0] || 'https://via.placeholder.com/300'}
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="p-3 md:p-5 border-t border-outline-variant/5">
+              <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-secondary mb-1">{product.category}</p>
+              <h3 className="font-bold text-sm md:text-base mb-2 line-clamp-1">{product.name}</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-base md:text-xl font-black text-on-background">₦{product.price?.toLocaleString()}</span>
+                {product.discountPrice && product.discountPrice < product.price && (
+                  <span className="text-secondary line-through text-[10px] md:text-xs">₦{product.discountPrice?.toLocaleString()}</span>
+                )}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const TrendingDeals = () => {
+  const [deals, setDeals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHotDeals = async () => {
+      try {
+        // Fetch specific section deals
+        const hotDeals = await DealService.getWhere('section', '==', 'hot-deals');
+        setDeals(hotDeals);
+      } catch (error) {
+        console.error("Error fetching deals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHotDeals();
+  }, []);
+
+  if (loading) return (
+    <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 mb-24 flex justify-center py-12">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </section>
+  );
+
+  if (deals.length === 0) return null;
+
+  return (
+    <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 mb-24">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+        <div>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">Trending Deals</h2>
+          <p className="text-secondary text-sm md:text-base">Limited time offers on top-tier gadgets.</p>
+        </div>
+        <Link to="/sales" className="text-primary font-bold flex items-center gap-2 hover:underline text-sm md:text-base">
+          View All <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {deals.slice(0, 4).map((deal) => (
+          <div key={deal.id} className="group bg-surface-container-lowest p-4 md:p-6 rounded-xl border border-outline-variant/10 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+            <span className="absolute top-4 left-4 z-10 bg-primary-container text-on-primary-fixed text-[10px] font-bold px-3 py-1 rounded-full uppercase">HOT DEAL</span>
+            <div className="aspect-square mb-4 md:mb-6 overflow-hidden flex items-center justify-center">
+              <img alt={deal.productName} className="w-4/5 object-contain transition-transform duration-500 group-hover:scale-110" src={deal.image} referrerPolicy="no-referrer" />
+            </div>
+            <h3 className="font-bold text-base md:text-lg mb-1 line-clamp-1">{deal.productName}</h3>
+            <div className="flex items-center gap-2 md:gap-3">
+              <span className="text-xl md:text-2xl font-black text-on-background">₦{deal.dealPrice?.toLocaleString()}</span>
+              {deal.originalPrice && <span className="text-secondary line-through text-xs md:text-sm">₦{deal.originalPrice?.toLocaleString()}</span>}
+            </div>
+            <Link to={`/product/${deal.id}`} className="block mt-6">
+              <button className="w-full py-3 bg-on-background text-white font-bold rounded hover:bg-primary transition-colors flex items-center justify-center gap-2 text-sm">
+                View Deal
+              </button>
+            </Link>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
 
 const AboutSection = () => (
   <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 mb-24 py-12 md:py-20 bg-white rounded-3xl border border-outline-variant/5">
@@ -419,13 +540,71 @@ const Newsletter = () => (
 );
 
 export const HomePage = () => {
+  const [dealOfTheDay, setDealOfTheDay] = useState<any>(null);
+  const [promoDeal, setPromoDeal] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTopDeals = async () => {
+      try {
+        // Use flash-sales for hero deal
+        const flashDeals = await DealService.getWhere('section', '==', 'flash-sales');
+        const activeFlash = flashDeals.filter(d => d.status === 'Active');
+        if (activeFlash.length > 0) setDealOfTheDay(activeFlash[0]);
+
+        // Use power-bundles for promo section
+        const bundles = await DealService.getWhere('section', '==', 'power-bundles');
+        const activeBundles = bundles.filter(d => d.status === 'Active');
+        if (activeBundles.length > 0) setPromoDeal(activeBundles[0]);
+      } catch (error) {
+        console.error("Error fetching homepage deals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTopDeals();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
-      <Hero />
+      <Hero deal={dealOfTheDay} />
       <TrustStrip />
+      <NewArrivals />
       <TrendingDeals />
       <AboutSection />
-      <PromoSection />
+      
+      {/* Dynamic Promo Section */}
+      {promoDeal ? (
+        <section className="max-w-screen-2xl mx-auto px-6 mb-24">
+          <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden group">
+            <img 
+              alt={promoDeal.productName} 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              src={promoDeal.image}
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex items-center px-6 md:px-12">
+              <div className="max-w-xl">
+                <span className="inline-block bg-primary-container text-on-primary-fixed px-3 py-1 rounded text-[10px] md:text-xs font-black uppercase tracking-widest mb-4">Limited Edition</span>
+                <h2 className="text-white text-3xl md:text-6xl font-black tracking-tighter mb-4 md:mb-6">
+                  Exclusive <br/><span className="text-primary-container">{promoDeal.productName}</span>
+                </h2>
+                <p className="text-zinc-300 text-sm md:text-lg mb-6 md:mb-8 line-clamp-2 md:line-clamp-none">
+                  Special price: ₦{promoDeal.dealPrice?.toLocaleString()}. Original ₦{promoDeal.originalPrice?.toLocaleString()}. Limited stock available!
+                </p>
+                <Link to={`/product/${promoDeal.id}`}>
+                  <Button variant="secondary" size="lg" className="flex items-center gap-2 text-sm md:text-base">
+                    View Offer <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <PromoSection />
+      )}
+
       <RepairSection />
       <TechInsights />
       <Categories />

@@ -2,8 +2,8 @@ import { Category } from '@/types';
 import { cn } from '@/utils';
 
 interface FilterSidebarProps {
-  selectedCondition: 'Brand New' | 'UK Used';
-  onConditionChange: (condition: 'Brand New' | 'UK Used') => void;
+  selectedCondition: 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned';
+  onConditionChange: (condition: 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned') => void;
   selectedCategories: Category[];
   onCategoryToggle: (category: Category) => void;
 }
@@ -15,9 +15,11 @@ export const FilterSidebar = ({
   onCategoryToggle
 }: FilterSidebarProps) => {
   const categories: Category[] = [
-    'Smartphones',
-    'Laptops & MacBooks',
-    'Tablets & iPads',
+    'ALL',
+    'Phones',
+    'Laptops',
+    'Tablets',
+    'Watches',
     'Accessories'
   ];
 
@@ -26,25 +28,19 @@ export const FilterSidebar = ({
   return (
     <aside className="space-y-8">
       {/* Condition Toggle */}
-      <div className="p-1 bg-surface-container rounded-xl flex">
-        <button 
-          onClick={() => onConditionChange('Brand New')}
-          className={cn(
-            "flex-1 py-2.5 px-3 rounded-lg text-xs font-bold transition-all",
-            selectedCondition === 'Brand New' ? "bg-white text-on-background shadow-sm" : "text-secondary hover:text-on-background"
-          )}
-        >
-          Brand New
-        </button>
-        <button 
-          onClick={() => onConditionChange('UK Used')}
-          className={cn(
-            "flex-1 py-2.5 px-3 rounded-lg text-xs font-bold transition-all",
-            selectedCondition === 'UK Used' ? "bg-white text-on-background shadow-sm" : "text-secondary hover:text-on-background"
-          )}
-        >
-          UK Used
-        </button>
+      <div className="p-1 bg-surface-container rounded-xl flex flex-wrap gap-1">
+        {(['Brand New', 'UK Used', 'Refurbished', 'Pre-owned'] as const).map((cond) => (
+          <button 
+            key={cond}
+            onClick={() => onConditionChange(cond)}
+            className={cn(
+              "flex-1 min-w-[45%] py-2.5 px-3 rounded-lg text-[10px] md:text-xs font-bold transition-all whitespace-nowrap",
+              selectedCondition === cond ? "bg-white text-on-background shadow-sm" : "text-secondary hover:text-on-background"
+            )}
+          >
+            {cond}
+          </button>
+        ))}
       </div>
 
       {/* Category */}

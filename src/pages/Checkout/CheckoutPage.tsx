@@ -1,43 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Truck as TruckIcon, 
-  Store as StoreIcon, 
-  CreditCard as CardIcon, 
-  Building2, 
-  Wallet, 
-  Trash2 as TrashIcon, 
-  Lock as LockIcon, 
   ShieldCheck as ShieldIcon, 
   History as HistoryIcon, 
-  Headphones,
-  Plus,
+  Truck as TruckIcon, 
+  Lock as LockIcon,
+  Store as StoreIcon,
+  CreditCard as CardIcon,
+  Trash2 as TrashIcon,
+  Building2,
+  Wallet,
   Minus,
+  Plus,
+  Headphones,
   X,
   MessageCircle,
   CheckCircle2,
-  FileText
+  FileText,
+  Download,
+  Loader2,
+  ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import * as htmlToImage from 'html-to-image';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { cn, formatCurrency } from '@/utils';
 import { useCartStore } from '@/store/useCartStore';
+import { useAuth } from '@/hooks/useAuth';
+import { OrderService } from '@/backend/services/firestore.service';
+import { useNavigate } from 'react-router-dom';
 
 export const CheckoutPage = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [fulfillment, setFulfillment] = useState<'delivery' | 'pickup'>('delivery');
   const [payment, setPayment] = useState<'card' | 'transfer' | 'pod'>('card');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [createdOrderId, setCreatedOrderId] = useState('');
+  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+  const [isWhatsAppReadyModalOpen, setIsWhatsAppReadyModalOpen] = useState(false);
+  const receiptRef = React.useRef<HTMLDivElement>(null);
+  
   const [shippingInfo, setShippingInfo] = useState({
-    firstName: 'Alexander',
-    lastName: 'Pierce',
-    email: 'a.pierce@precision.tech',
-    address: '4421 Tech Plaza, Silicon Valley, CA 94025',
-    city: 'Lagos',
-    phone: '+2348000000000'
+    firstName: '',
+    lastName: '',
+    email: '',
+    address: '',
+    city: '',
+    phone: ''
   });
 
-  const { items, removeItem, updateQuantity, getTotal } = useCartStore();
+  useEffect(() => {
+    if (user) {
+      setShippingInfo(prev => ({
+        ...prev,
+        email: user.email || '',
+        firstName: user.displayName?.split(' ')[0] || '',
+        lastName: user.displayName?.split(' ').slice(1).join(' ') || ''
+      }));
+    }
+  }, [user]);
+
+  const { items, removeItem, updateQuantity, getTotal, clearCart } = useCartStore();
 
   const subtotal = getTotal();
   const shipping = fulfillment === 'delivery' ? 15000 : 0;
@@ -48,18 +75,98 @@ export const CheckoutPage = () => {
     if (payment === 'card' || payment === 'transfer') {
       setIsPaymentModalOpen(true);
     } else {
+      processOrder(false);
+    }
+  };
+
+  const processOrder = async (isPaid: boolean, source: 'web' | 'whatsapp' = 'web') => {
+    if (!user) return null;
+    setIsProcessing(true);
+    try {
+      const orderData = {
+        userId: user.uid,
+        customerName: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
+        customerEmail: shippingInfo.email,
+        customerPhone: shippingInfo.phone,
+        shippingAddress: shippingInfo.address,
+        city: shippingInfo.city,
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+          category: item.category || 'General'
+        })),
+        subtotal,
+        shippingFee: shipping,
+        vat,
+        total,
+        fulfillmentMethod: fulfillment,
+        paymentMethod: source === 'whatsapp' ? 'whatsapp' : payment,
+        orderSource: source,
+        status: 'Processing' as any
+      };
+      
+      const newOrder = await OrderService.create(orderData as any);
+      setCreatedOrderId(newOrder.id);
+      return newOrder.id;
+    } catch (error) {
+      console.error('Failed to create order', error);
+      alert('Failed to process your order. Please try again.');
+      return null;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPaymentModalOpen(false);
+    const orderId = await processOrder(true, 'web');
+    if (orderId) {
       setIsReceiptModalOpen(true);
     }
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsPaymentModalOpen(false);
-    setIsReceiptModalOpen(true);
+  const handleWhatsAppCheckout = async () => {
+    if (!shippingInfo.phone || !shippingInfo.address) {
+      alert('Please provide your phone number and address first.');
+      return;
+    }
+
+    setIsGeneratingImage(true);
+    
+    // 1. Create order in Firestore
+    const orderId = await processOrder(false, 'whatsapp');
+    if (!orderId) {
+       setIsGeneratingImage(false);
+       return;
+    }
+
+    // 2. Wait a bit for the hidden receipt to render
+    setTimeout(async () => {
+      if (receiptRef.current) {
+        try {
+          const dataUrl = await htmlToImage.toPng(receiptRef.current, {
+            quality: 1,
+            backgroundColor: '#ffffff'
+          });
+          setReceiptImageUrl(dataUrl);
+          setIsWhatsAppReadyModalOpen(true);
+        } catch (error) {
+          console.error('Error generating receipt image:', error);
+          alert('Could not generate receipt image, but your order was recorded. Opening WhatsApp with text summary.');
+          openWhatsApp(orderId);
+        } finally {
+          setIsGeneratingImage(false);
+        }
+      }
+    }, 500);
   };
 
-  const handleWhatsAppCheckout = () => {
-    const message = `Hello Sam-B Tech, I would like to place an order.\n\n*Order Summary:*\n${items.map(i => `- ${i.quantity}x ${i.name} (${formatCurrency(i.price)})`).join('\n')}\n\n*Total:* ${formatCurrency(total)}\n*Fulfillment:* ${fulfillment}\n*Payment:* ${payment}\n\n*Shipping Info:*\n${shippingInfo.firstName} ${shippingInfo.lastName}\n${shippingInfo.address}, ${shippingInfo.city}\n${shippingInfo.phone}`;
+  const openWhatsApp = (orderId: string) => {
+    const message = `Hello Sam-B Tech, I would like to place an order.\n\n*Order ID:* ${orderId}\n*Summary:*\n${items.map(i => `- ${i.quantity}x ${i.name} (${formatCurrency(i.price)})`).join('\n')}\n\n*Total:* ${formatCurrency(total)}\n*Fulfillment:* ${fulfillment}\n\n*Shipping Info:*\n${shippingInfo.firstName} ${shippingInfo.lastName}\n${shippingInfo.address}, ${shippingInfo.city}\n${shippingInfo.phone}\n\n_I have attached my receipt below._`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/2348000000000?text=${encodedMessage}`, '_blank');
   };
@@ -304,11 +411,11 @@ export const CheckoutPage = () => {
 
                 <Button 
                   onClick={handleCompleteOrder}
-                  disabled={items.length === 0}
+                  disabled={items.length === 0 || isProcessing}
                   className="w-full bg-primary-container text-on-primary-fixed font-black text-base md:text-lg py-4 md:py-5 rounded-xl shadow-lg shadow-primary-container/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 mt-6 md:mt-8"
                 >
-                  Complete Order
-                  <LockIcon className="w-5 h-5" />
+                  {isProcessing ? 'Processing...' : 'Complete Order'}
+                  {!isProcessing && <LockIcon className="w-5 h-5" />}
                 </Button>
                 <Button 
                   onClick={handleWhatsAppCheckout}
@@ -339,6 +446,210 @@ export const CheckoutPage = () => {
             </div>
           </aside>
         </div>
+
+        {/* Hidden Receipt for Image Generation */}
+        <div className="fixed -left-[2000px] top-0">
+          <div 
+            ref={receiptRef}
+            className="w-[500px] bg-white p-10 text-black font-sans leading-relaxed"
+          >
+            <div className="text-center mb-10 pb-10 border-b-2 border-slate-100">
+              <h1 className="text-3xl font-black tracking-tighter mb-2">SAM-B TECH</h1>
+              <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-xs">Premium Gadgets & Tech Hub</p>
+            </div>
+
+            <div className="flex justify-between items-start mb-10">
+              <div>
+                <h2 className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Order Information</h2>
+                <p className="font-bold text-lg">#{createdOrderId}</p>
+                <p className="text-slate-500 text-sm">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+              </div>
+              <div className="text-right">
+                <h2 className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Checkout Type</h2>
+                <p className="font-bold text-lg text-green-600">WhatsApp Order</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-10 mb-10 pb-10 border-b-2 border-slate-100">
+              <div>
+                <h2 className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Customer</h2>
+                <p className="font-bold">{shippingInfo.firstName} {shippingInfo.lastName}</p>
+                <p className="text-slate-500 text-sm">{shippingInfo.email}</p>
+                <p className="text-slate-500 text-sm">{shippingInfo.phone}</p>
+              </div>
+              <div>
+                <h2 className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-2">Shipping To</h2>
+                <p className="font-bold capitalize">{fulfillment}</p>
+                <p className="text-slate-500 text-sm leading-snug">
+                  {fulfillment === 'delivery' 
+                    ? `${shippingInfo.address}, ${shippingInfo.city}`
+                    : "Pickup at Ikorodu Hub (56 Obafemi Awolowo Rd)"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-10">
+              <h2 className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-4">Order Items</h2>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-slate-400 border-b border-slate-50">
+                    <th className="pb-3 font-bold">Item Description</th>
+                    <th className="pb-3 font-bold text-center">Qty</th>
+                    <th className="pb-3 font-bold text-right">Price</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {items.map(item => (
+                    <tr key={item.id}>
+                      <td className="py-4 font-bold">{item.name}</td>
+                      <td className="py-4 text-center">{item.quantity}</td>
+                      <td className="py-4 text-right font-bold">{formatCurrency(item.price * item.quantity)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-2xl space-y-3">
+              <div className="flex justify-between text-slate-500 font-medium">
+                <span>Subtotal</span>
+                <span>{formatCurrency(subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-slate-500 font-medium">
+                <span>Shipping</span>
+                <span>{formatCurrency(shipping)}</span>
+              </div>
+              <div className="flex justify-between text-slate-500 font-medium">
+                <span>VAT (7.5%)</span>
+                <span>{formatCurrency(vat)}</span>
+              </div>
+              <div className="flex justify-between pt-4 border-t border-slate-200">
+                <span className="text-xl font-black">TOTAL AMOUNT</span>
+                <span className="text-2xl font-black text-blue-600">{formatCurrency(total)}</span>
+              </div>
+            </div>
+
+            <div className="mt-10 pt-10 border-t-2 border-slate-100 text-center">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2">Verified Order Receipt</p>
+              <p className="text-[9px] text-slate-300">This receipt was digitally generated at checkout by Sam-B Tech Platform.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Generating Image Overlay */}
+        <AnimatePresence>
+          {isGeneratingImage && (
+            <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center"
+              >
+                <div className="relative w-24 h-24 mb-8 mx-auto">
+                  <div className="absolute inset-0 border-4 border-white/10 rounded-full" />
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                    className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full"
+                  />
+                  <FileText className="absolute inset-0 m-auto w-10 h-10 text-white" />
+                </div>
+                <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Preparing Your Receipt</h2>
+                <p className="text-slate-400">Recording order and generating shareable image...</p>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* WhatsApp Ready Modal */}
+        <AnimatePresence>
+          {isWhatsAppReadyModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
+              >
+                <div className="p-8 pb-4 flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center">
+                      <MessageCircle className="w-6 h-6 text-green-500" />
+                    </div>
+                    <h2 className="text-xl font-black tracking-tight">WhatsApp Checkout Ready</h2>
+                  </div>
+                  <button 
+                    onClick={() => setIsWhatsAppReadyModalOpen(false)}
+                    className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="p-8 pt-4 space-y-6">
+                  <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium leading-relaxed">
+                    Your order has been recorded! We've generated your receipt image. Please follow these steps to complete your checkout:
+                  </p>
+
+                  <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Receipt Preview</span>
+                      {receiptImageUrl && (
+                        <a 
+                          href={receiptImageUrl} 
+                          download={`SamB-Receipt-${createdOrderId}.png`}
+                          className="flex items-center gap-1.5 text-[10px] font-bold text-blue-500 hover:text-blue-600 transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Download Image
+                        </a>
+                      )}
+                    </div>
+                    {receiptImageUrl ? (
+                      <div className="aspect-[4/5] bg-white rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-inner">
+                        <img src={receiptImageUrl} className="w-full h-full object-contain" alt="Order Receipt" />
+                      </div>
+                    ) : (
+                      <div className="aspect-[4/5] bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-2xl" />
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0 w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                      <p className="text-sm">Click <b>"Open WhatsApp"</b> below to start the chat.</p>
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0 w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                      <p className="text-sm"><b>Attach the receipt image</b> (download it first if on mobile) and send it.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setIsWhatsAppReadyModalOpen(false);
+                        clearCart();
+                        navigate('/');
+                      }}
+                      className="h-14 rounded-2xl font-bold"
+                    >
+                      Done
+                    </Button>
+                    <Button 
+                      onClick={() => openWhatsApp(createdOrderId)}
+                      className="h-14 rounded-2xl font-black bg-green-500 hover:bg-green-600 text-white flex items-center justify-center gap-2 border-none"
+                    >
+                      Open WhatsApp
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* Payment Modal */}
         <AnimatePresence>
           {isPaymentModalOpen && (
@@ -424,7 +735,7 @@ export const CheckoutPage = () => {
                       <FileText className="w-8 h-8 text-primary" />
                     </div>
                     <h3 className="font-bold text-2xl mb-1">Receipt</h3>
-                    <p className="text-secondary text-sm">Order #SAM-{Math.floor(Math.random() * 1000000)}</p>
+                    <p className="text-secondary text-sm">Order #{createdOrderId || `SAM-${Math.floor(Math.random() * 1000000)}`}</p>
                   </div>
 
                   <div className="space-y-6">
@@ -489,7 +800,8 @@ export const CheckoutPage = () => {
                   <Button 
                     onClick={() => {
                       setIsReceiptModalOpen(false);
-                      // In a real app, clear cart and redirect to dashboard
+                      clearCart();
+                      navigate('/');
                     }}
                     className="w-full h-12 font-bold"
                   >

@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '@/backend/config/firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -9,14 +12,44 @@ const SignupPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    setError('');
+    
+    try {
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Update Auth Profile
+      await updateProfile(userCredential.user, {
+        displayName: name
+      });
+      
+      // Create user document in Firestore to store custom role
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        name,
+        email,
+        role: 'user', // Default role is user
+        createdAt: new Date().toISOString()
+      });
+      
       navigate('/dashboard');
-    }, 1500);
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please log in instead.');
+      } else {
+        setError(err.message || 'Failed to create account. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -28,6 +61,11 @@ const SignupPage = () => {
         </div>
 
         <form onSubmit={handleSignup} className="space-y-6">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-xl text-sm font-bold text-center">
+              {error}
+            </div>
+          )}
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-secondary">Full Name</label>
             <div className="relative">
@@ -36,6 +74,8 @@ const SignupPage = () => {
                 type="text" 
                 placeholder="John Doe" 
                 className="pl-12 h-14 bg-surface-container-low border-transparent focus:border-primary focus:ring-primary"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
@@ -49,6 +89,8 @@ const SignupPage = () => {
                 type="email" 
                 placeholder="you@example.com" 
                 className="pl-12 h-14 bg-surface-container-low border-transparent focus:border-primary focus:ring-primary"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -62,6 +104,8 @@ const SignupPage = () => {
                 type={showPassword ? "text" : "password"} 
                 placeholder="••••••••" 
                 className="pl-12 pr-12 h-14 bg-surface-container-low border-transparent focus:border-primary focus:ring-primary"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
               />

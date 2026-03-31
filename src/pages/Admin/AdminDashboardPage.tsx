@@ -17,12 +17,16 @@ import {
   Eye,
   TrendingUp,
   DollarSign,
-  Clock
+  Clock,
+  Smartphone,
+  LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { cn, formatCurrency } from '@/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 // Sub-components for different tabs
 import { AdminOverview } from './tabs/AdminOverview';
@@ -30,9 +34,21 @@ import { AdminProducts } from './tabs/AdminProducts';
 import { AdminOrders } from './tabs/AdminOrders';
 import { AdminDeals } from './tabs/AdminDeals';
 import { AdminTradeIns } from './tabs/AdminTradeIns';
+import { AdminRepairs } from './tabs/AdminRepairs';
 
 export const AdminDashboardPage = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -40,6 +56,7 @@ export const AdminDashboardPage = () => {
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'deals', label: 'Deals & Promos', icon: Tag },
     { id: 'trade-ins', label: 'Trade-Ins', icon: RefreshCw },
+    { id: 'repairs', label: 'Repairs', icon: Smartphone },
     { id: 'customers', label: 'Customers', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -51,6 +68,7 @@ export const AdminDashboardPage = () => {
       case 'orders': return <AdminOrders />;
       case 'deals': return <AdminDeals />;
       case 'trade-ins': return <AdminTradeIns />;
+      case 'repairs': return <AdminRepairs />;
       default: return <div className="p-8 text-center text-secondary">Module under construction</div>;
     }
   };
@@ -78,6 +96,16 @@ export const AdminDashboardPage = () => {
               </button>
             ))}
           </nav>
+
+          <div className="pt-6 mt-6 border-t border-outline-variant/30">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-red-500 hover:bg-red-50 transition-all"
+            >
+              <LogOut className="w-5 h-5" />
+              Sign Out
+            </button>
+          </div>
         </div>
       </aside>
 

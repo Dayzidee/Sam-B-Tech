@@ -1,10 +1,12 @@
-import { Star, ShoppingCart } from 'lucide-react';
+import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
 import { Product } from '@/types';
 import { formatCurrency } from '@/utils';
 import { useCartStore } from '@/store/useCartStore';
+import { useFavoritesStore } from '@/store/useFavoritesStore';
+import { cn } from '@/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +15,8 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCartStore();
+  const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
+  const isProdFav = isFavorite(product.id);
 
   return (
     <div className="group flex flex-col">
@@ -33,6 +37,27 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             {product.condition === 'Brand New' && <Badge variant="new">New</Badge>}
             {product.isSale && <Badge variant="sale">Sale</Badge>}
           </div>
+
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (isProdFav) {
+                removeFavorite(product.id);
+              } else {
+                addFavorite({
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  image: product.image,
+                  category: product.category
+                });
+              }
+            }}
+            className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur rounded-full opacity-0 transition-all group-hover:opacity-100 shadow-sm hover:scale-110 z-10"
+          >
+            <Heart className={cn("w-4 h-4", isProdFav ? "fill-red-500 text-red-500" : "text-secondary")} />
+          </button>
 
           <button 
             onClick={(e) => {

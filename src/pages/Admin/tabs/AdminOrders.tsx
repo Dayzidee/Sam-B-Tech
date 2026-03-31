@@ -1,39 +1,153 @@
-import React, { useState } from 'react';
-import { Search, Eye, CheckCircle, XCircle, Truck, Package, Clock, FileText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Eye, CheckCircle, XCircle, Truck, Package, Clock, FileText, Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { cn, formatCurrency } from '@/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { OrderService, Order } from '@/backend/services/firestore.service';
+import { StatusModal } from '@/components/ui/StatusModal';
 
 export const AdminOrders = () => {
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  
-  const orders = [
-    { id: 'SAM-1001', customer: 'John Doe', date: 'Oct 24, 2023', total: 1250000, status: 'Processing', items: 2, payment: 'Card' },
-    { id: 'SAM-1002', customer: 'Jane Smith', date: 'Oct 23, 2023', total: 450000, status: 'Shipped', items: 1, payment: 'Transfer' },
-    { id: 'SAM-1003', customer: 'Michael Johnson', date: 'Oct 22, 2023', total: 85000, status: 'Delivered', items: 3, payment: 'Pay on Delivery' },
-    { id: 'SAM-1004', customer: 'Sarah Williams', date: 'Oct 21, 2023', total: 2100000, status: 'Cancelled', items: 1, payment: 'Card' },
-  ];
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All Statuses');
+  const [newStatus, setNewStatus] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [statusModal, setStatusModal] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error' | 'info';
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: ''
+  });
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setNewStatus(selectedOrder.status);
+    }
+  }, [selectedOrder]);
+
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    try {
+      const data = await OrderService.getAll();
+      // Sort by createdAt descending
+      const sorted = data.sort((a, b) => {
+        const aTime = a.createdAt?.seconds || 0;
+        const bTime = b.createdAt?.seconds || 0;
+        return bTime - aTime;
+      });
+      setOrders(sorted);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!selectedOrder?.id || !newStatus || newStatus === selectedOrder.status) return;
+
+    setIsUpdating(true);
+    try {
+      await OrderService.update(selectedOrder.id, { status: newStatus as Order['status'] });
+      // Update local state
+      setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, status: newStatus as Order['status'] } : o));
+      setSelectedOrder({ ...selectedOrder, status: newStatus as Order['status'] });
+      setStatusModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Status Updated',
+        message: `Order status changed to "${newStatus}".`
+      });
+    } catch (error) {
+      console.error('Error updating order:', error);
+      setStatusModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Could not update order status. Please try again.'
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!selectedOrder?.id) return;
+    
+    if (!window.confirm("Are you sure you want to permanently delete this order? This action cannot be undone.")) return;
+
+    setIsDeleting(true);
+    try {
+      await OrderService.delete(selectedOrder.id);
+      setOrders(prev => prev.filter(o => o.id !== selectedOrder.id));
+      setSelectedOrder(null);
+      setStatusModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Order Deleted',
+        message: 'The order has been permanently deleted.'
+      });
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      setStatusModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Delete Failed',
+        message: 'Could not delete order. Please try again.'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'Processing': return 'bg-yellow-100 text-yellow-800';
       case 'Shipped': return 'bg-blue-100 text-blue-800';
+      case 'In Transit': return 'bg-indigo-100 text-indigo-800';
       case 'Delivered': return 'bg-green-100 text-green-800';
       case 'Cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
+  const formatDate = (timestamp: any) => {
+    if (!timestamp?.seconds) return 'N/A';
+    return new Date(timestamp.seconds * 1000).toLocaleDateString('en-NG', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
+  };
+
+  const filteredOrders = orders.filter(o => {
+    const matchesSearch = (o.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (o.id || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'All Statuses' || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <h1 className="font-headline font-black text-3xl">Orders</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" /> Export CSV
-          </Button>
+        <div>
+          <h1 className="font-headline font-black text-3xl">Orders</h1>
+          <p className="text-secondary text-sm">{orders.length} total order{orders.length !== 1 ? 's' : ''}</p>
         </div>
+        <Button variant="outline" className="flex items-center gap-2" onClick={fetchOrders}>
+          <FileText className="w-4 h-4" /> Refresh
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -42,16 +156,27 @@ export const AdminOrders = () => {
           "bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 overflow-hidden flex flex-col",
           selectedOrder ? "lg:col-span-2" : "lg:col-span-3"
         )}>
-          <div className="p-4 border-b border-outline-variant/30 flex items-center justify-between">
+          <div className="p-4 border-b border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
-              <Input className="pl-10 h-10" placeholder="Search orders by ID or customer..." />
+              <Input
+                className="pl-10 h-10"
+                placeholder="Search orders by ID or customer..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
             </div>
-            <select className="h-10 px-3 rounded-lg border border-outline-variant bg-surface text-sm font-bold text-secondary focus:outline-none ml-4">
+            <select
+              className="h-10 px-3 rounded-lg border border-outline-variant bg-surface text-sm font-bold text-secondary focus:outline-none"
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+            >
               <option>All Statuses</option>
               <option>Processing</option>
               <option>Shipped</option>
+              <option>In Transit</option>
               <option>Delivered</option>
+              <option>Cancelled</option>
             </select>
           </div>
           
@@ -68,31 +193,54 @@ export const AdminOrders = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
-                {orders.map((order) => (
-                  <tr 
-                    key={order.id} 
-                    className={cn(
-                      "hover:bg-surface-container-low/50 transition-colors cursor-pointer",
-                      selectedOrder?.id === order.id ? "bg-primary-container/10" : ""
-                    )}
-                    onClick={() => setSelectedOrder(order)}
-                  >
-                    <td className="p-4 font-bold text-sm">{order.id}</td>
-                    <td className="p-4 text-sm">{order.customer}</td>
-                    <td className="p-4 text-sm text-secondary">{order.date}</td>
-                    <td className="p-4 font-bold text-sm">{formatCurrency(order.total)}</td>
-                    <td className="p-4">
-                      <span className={cn("px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest", getStatusColor(order.status))}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <button className="p-2 text-primary hover:bg-primary-container/20 rounded-lg transition-colors">
-                        <Eye className="w-4 h-4" />
-                      </button>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="p-20 text-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+                      <p className="text-secondary font-bold">Loading orders...</p>
                     </td>
                   </tr>
-                ))}
+                ) : filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-20 text-center">
+                      <Clock className="w-10 h-10 text-outline-variant mx-auto mb-2 opacity-20" />
+                      <p className="text-sm text-secondary font-bold">No orders found.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOrders.map((order) => (
+                    <tr 
+                      key={order.id} 
+                      className={cn(
+                        "hover:bg-surface-container-low/50 transition-colors cursor-pointer",
+                        selectedOrder?.id === order.id ? "bg-primary-container/10" : ""
+                      )}
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      <td className="p-4 font-bold text-xs font-mono">{order.id?.slice(0, 8)}...</td>
+                      <td className="p-4 text-sm">{order.customerName || 'N/A'}</td>
+                      <td className="p-4 text-sm text-secondary">{formatDate(order.createdAt)}</td>
+                      <td className="p-4 font-bold text-sm">{formatCurrency(order.total || 0)}</td>
+                      <td className="p-4">
+                        <div className="flex flex-col gap-1">
+                          <span className={cn("px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-center", getStatusColor(order.status))}>
+                            {order.status}
+                          </span>
+                          {order.orderSource === 'whatsapp' && (
+                            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter text-center border border-green-200">
+                              WhatsApp Order
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4 text-right">
+                        <button className="p-2 text-primary hover:bg-primary-container/20 rounded-lg transition-colors">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -110,11 +258,16 @@ export const AdminOrders = () => {
               <div className="p-6 border-b border-outline-variant/30 flex justify-between items-center">
                 <div>
                   <h2 className="font-headline font-bold text-xl">Order Details</h2>
-                  <p className="text-sm text-secondary font-mono mt-1">{selectedOrder.id}</p>
+                  <p className="text-sm text-secondary font-mono mt-1">{selectedOrder.id?.slice(0, 12)}...</p>
                 </div>
-                <button onClick={() => setSelectedOrder(null)} className="p-2 text-secondary hover:bg-surface-container-low rounded-full">
-                  <XCircle className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button onClick={handleDeleteOrder} disabled={isDeleting} className="p-2 text-red-500 hover:bg-red-500/10 rounded-full transition-colors" title="Delete Order">
+                    {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+                  </button>
+                  <button onClick={() => setSelectedOrder(null)} className="p-2 text-secondary hover:bg-surface-container-low rounded-full transition-colors">
+                    <XCircle className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               <div className="p-6 flex-1 overflow-y-auto space-y-6">
@@ -122,14 +275,24 @@ export const AdminOrders = () => {
                 <div className="bg-surface-container-low p-4 rounded-xl">
                   <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-3">Update Status</h3>
                   <div className="flex gap-2">
-                    <select className="flex-1 h-10 px-3 rounded-lg border border-outline-variant bg-surface text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <select
+                      className="flex-1 h-10 px-3 rounded-lg border border-outline-variant bg-surface text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      value={newStatus}
+                      onChange={e => setNewStatus(e.target.value)}
+                    >
                       <option value="Processing">Processing</option>
                       <option value="Shipped">Shipped</option>
                       <option value="In Transit">In Transit</option>
                       <option value="Delivered">Delivered</option>
                       <option value="Cancelled">Cancelled</option>
                     </select>
-                    <Button size="sm">Update</Button>
+                    <Button
+                      size="sm"
+                      onClick={handleUpdateStatus}
+                      disabled={isUpdating || newStatus === selectedOrder.status}
+                    >
+                      {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update'}
+                    </Button>
                   </div>
                 </div>
 
@@ -137,42 +300,39 @@ export const AdminOrders = () => {
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 border-b border-outline-variant/30 pb-2">Customer Information</h3>
                   <div className="space-y-2 text-sm">
-                    <p><span className="font-bold">Name:</span> {selectedOrder.customer}</p>
-                    <p><span className="font-bold">Email:</span> customer@example.com</p>
-                    <p><span className="font-bold">Phone:</span> +234 800 000 0000</p>
-                    <p><span className="font-bold">Address:</span> 123 Tech Street, Ikeja, Lagos</p>
+                    <p><span className="font-bold">Name:</span> {selectedOrder.customerName || 'N/A'}</p>
+                    <p><span className="font-bold">Email:</span> {selectedOrder.customerEmail || 'N/A'}</p>
+                    <p><span className="font-bold">Phone:</span> {selectedOrder.customerPhone || 'N/A'}</p>
+                    <p><span className="font-bold">Address:</span> {selectedOrder.shippingAddress || 'N/A'}{selectedOrder.city ? `, ${selectedOrder.city}` : ''}</p>
+                    <p><span className="font-bold">Fulfillment:</span> {selectedOrder.fulfillmentMethod === 'pickup' ? 'In-Store Pickup' : 'Delivery'}</p>
                   </div>
                 </div>
 
-                {/* Order Items (Mock) */}
+                {/* Order Items - Dynamic */}
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 border-b border-outline-variant/30 pb-2">Order Items</h3>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center text-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-surface-container-highest rounded-lg flex items-center justify-center">
-                          <Package className="w-5 h-5 text-secondary" />
-                        </div>
-                        <div>
-                          <p className="font-bold">iPhone 15 Pro Max</p>
-                          <p className="text-xs text-secondary">Qty: 1 • Titanium • 256GB</p>
-                        </div>
-                      </div>
-                      <p className="font-bold">{formatCurrency(1200000)}</p>
-                    </div>
-                    {selectedOrder.items > 1 && (
-                      <div className="flex justify-between items-center text-sm">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-surface-container-highest rounded-lg flex items-center justify-center">
-                            <Package className="w-5 h-5 text-secondary" />
+                    {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                      selectedOrder.items.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center text-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-surface-container-highest rounded-lg overflow-hidden flex items-center justify-center shrink-0">
+                              {item.image ? (
+                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <Package className="w-5 h-5 text-secondary" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-bold">{item.name}</p>
+                              <p className="text-xs text-secondary">Qty: {item.quantity} • {item.category || 'N/A'}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-bold">AirPods Pro Gen 2</p>
-                            <p className="text-xs text-secondary">Qty: 1</p>
-                          </div>
+                          <p className="font-bold">{formatCurrency(item.price * item.quantity)}</p>
                         </div>
-                        <p className="font-bold">{formatCurrency(50000)}</p>
-                      </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-secondary italic">No items in this order.</p>
                     )}
                   </div>
                 </div>
@@ -183,32 +343,47 @@ export const AdminOrders = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between text-secondary">
                       <span>Subtotal</span>
-                      <span>{formatCurrency(selectedOrder.total - 5000)}</span>
+                      <span>{formatCurrency(selectedOrder.subtotal || 0)}</span>
                     </div>
                     <div className="flex justify-between text-secondary">
                       <span>Shipping</span>
-                      <span>{formatCurrency(5000)}</span>
+                      <span>{formatCurrency(selectedOrder.shippingFee || 0)}</span>
                     </div>
+                    {(selectedOrder.vat || 0) > 0 && (
+                      <div className="flex justify-between text-secondary">
+                        <span>VAT</span>
+                        <span>{formatCurrency(selectedOrder.vat)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between font-bold text-base pt-2 border-t border-outline-variant/30 mt-2">
                       <span>Total</span>
-                      <span>{formatCurrency(selectedOrder.total)}</span>
+                      <span>{formatCurrency(selectedOrder.total || 0)}</span>
                     </div>
-                    <div className="mt-4 p-3 bg-green-50 text-green-800 rounded-lg flex items-center gap-2 text-sm font-bold">
+                    <div className={cn(
+                      "mt-4 p-3 rounded-lg flex items-center gap-2 text-sm font-bold",
+                      selectedOrder.paymentMethod === 'whatsapp' ? "bg-green-50 text-green-800" : "bg-blue-50 text-blue-800"
+                    )}>
                       <CheckCircle className="w-4 h-4" />
-                      Paid via {selectedOrder.payment}
+                      {selectedOrder.paymentMethod === 'card' ? 'Paid via Card' :
+                       selectedOrder.paymentMethod === 'transfer' ? 'Paid via Transfer' :
+                       selectedOrder.paymentMethod === 'pod' ? 'Pay on Delivery' : 
+                       selectedOrder.paymentMethod === 'whatsapp' ? 'WhatsApp Checkout' : 'Payment Method N/A'}
                     </div>
                   </div>
                 </div>
-              </div>
-              
-              <div className="p-4 border-t border-outline-variant/30 bg-surface-container-low flex gap-3">
-                <Button className="flex-1" variant="outline">Print Receipt</Button>
-                <Button className="flex-1">Send Tracking</Button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      <StatusModal 
+        isOpen={statusModal.isOpen}
+        type={statusModal.type}
+        title={statusModal.title}
+        message={statusModal.message}
+        onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };

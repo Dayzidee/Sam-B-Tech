@@ -20,13 +20,15 @@ import {
   Rss,
   Package,
   CheckCircle2,
-  Clock
+  Clock,
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/utils';
+import { OrderService, Order } from '@/backend/services/firestore.service';
 
 interface FAQItemProps {
   question: string;
@@ -70,29 +72,30 @@ const FAQItem = ({ question, answer }: FAQItemProps) => {
 export const SupportPage = () => {
   const [orderId, setOrderId] = useState('');
   const [isTracking, setIsTracking] = useState(false);
-  const [orderStatus, setOrderStatus] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handleTrack = (e: React.FormEvent) => {
+  const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orderId.trim()) return;
 
     setIsTracking(true);
-    // Simulate API call
-    setTimeout(() => {
-      setOrderStatus({
-        id: orderId,
-        status: 'In Transit',
-        estimatedDelivery: 'Oct 25, 2023',
-        steps: [
-          { title: 'Order Placed', date: 'Oct 20, 2023, 10:00 AM', completed: true },
-          { title: 'Processing', date: 'Oct 21, 2023, 02:30 PM', completed: true },
-          { title: 'Shipped', date: 'Oct 22, 2023, 09:15 AM', completed: true },
-          { title: 'In Transit', date: 'Oct 23, 2023, 04:45 PM', completed: false },
-          { title: 'Delivered', date: 'Pending', completed: false },
-        ]
-      });
+    setError(null);
+    
+    try {
+      const order = await OrderService.getById(orderId.trim());
+      if (order) {
+        // Redirect to full tracking page for better UX
+        navigate(`/track-order?id=${orderId.trim()}`);
+      } else {
+        setError('Order not found. Please check the ID.');
+      }
+    } catch (err) {
+      console.error('Error tracking order:', err);
+      setError('An error occurred. Please try again.');
+    } finally {
       setIsTracking(false);
-    }, 1500);
+    }
   };
 
   const quickAccess = [
@@ -223,45 +226,13 @@ export const SupportPage = () => {
                   {isTracking ? 'Tracking...' : 'Track Order'}
                 </Button>
               </form>
+              {error && (
+                <p className="text-red-500 text-sm mt-4 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </p>
+              )}
             </div>
-
-            {orderStatus && (
-              <div className="bg-surface p-6 md:p-8 rounded-2xl shadow-sm border border-outline-variant/20 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-8 border-b border-outline-variant/30">
-                  <div>
-                    <p className="text-secondary text-xs md:text-sm font-bold uppercase tracking-widest mb-1">Order #{orderStatus.id}</p>
-                    <h2 className="font-headline font-bold text-xl md:text-2xl text-primary">{orderStatus.status}</h2>
-                  </div>
-                  <div className="mt-4 md:mt-0 text-left md:text-right">
-                    <p className="text-secondary text-xs md:text-sm font-bold uppercase tracking-widest mb-1">Estimated Delivery</p>
-                    <p className="font-headline font-bold text-lg md:text-xl">{orderStatus.estimatedDelivery}</p>
-                  </div>
-                </div>
-
-                <div className="relative">
-                  <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-outline-variant/30"></div>
-                  <div className="space-y-8 relative">
-                    {orderStatus.steps.map((step: any, index: number) => (
-                      <div key={index} className="flex gap-4 md:gap-6">
-                        <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center relative z-10 shrink-0 transition-colors",
-                          step.completed ? "bg-primary text-on-primary" : "bg-surface-container-highest text-secondary"
-                        )}>
-                          {step.completed ? <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> : <Clock className="w-4 h-4 md:w-5 md:h-5" />}
-                        </div>
-                        <div>
-                          <h4 className={cn(
-                            "font-bold text-base md:text-lg",
-                            step.completed ? "text-on-background" : "text-secondary"
-                          )}>{step.title}</h4>
-                          <p className="text-secondary text-xs md:text-sm mt-0.5">{step.date}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </section>
 

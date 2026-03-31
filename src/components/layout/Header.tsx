@@ -1,10 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
-import { User, Heart, ShoppingCart, Search } from 'lucide-react';
+import { User, Heart, ShoppingCart } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/utils';
 
 export const Header = () => {
-  const { cartCount } = useCartStore();
+  const items = useCartStore((state) => state.items);
+  const { user, isAdmin } = useAuth();
   const location = useLocation();
 
   const navLinks = [
@@ -15,8 +17,16 @@ export const Header = () => {
     { name: 'Support', path: '/support' },
   ];
 
+  // Determine where the profile button should go
+  const getProfilePath = () => {
+    if (!user) return '/login';
+    return isAdmin ? '/admin' : '/dashboard';
+  };
+
+  const profilePath = getProfilePath();
+
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+    <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl shadow-sm dark:shadow-none border-b border-zinc-200/50 dark:border-zinc-800/50">
       <div className="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto">
         <Link to="/" className="text-2xl font-black tracking-tighter text-black dark:text-white">
           SAM-B TECH
@@ -40,8 +50,14 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center space-x-5">
-          <Link to="/dashboard" className="text-zinc-600 hover:text-yellow-600 transition-all">
-            <User className={cn("w-5 h-5", location.pathname === '/dashboard' && "text-yellow-600 fill-current")} />
+          <Link to={profilePath} className="text-zinc-600 hover:text-yellow-600 transition-all group relative">
+            <User className={cn(
+              "w-5 h-5 transition-all", 
+              (location.pathname === '/dashboard' || location.pathname.startsWith('/admin')) && "text-yellow-600 fill-current"
+            )} />
+            {user && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-white dark:border-black" />
+            )}
           </Link>
           <Link to="/favourites" className="text-zinc-600 hover:text-yellow-600 transition-all">
             <Heart className={cn("w-5 h-5", location.pathname === '/favourites' && "text-yellow-600 fill-current")} />
@@ -50,9 +66,9 @@ export const Header = () => {
             <Link to="/checkout" className="text-zinc-600 hover:text-yellow-600 transition-all">
               <ShoppingCart className={cn("w-5 h-5", location.pathname === '/checkout' && "text-yellow-600")} />
             </Link>
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-yellow-500 text-on-primary-fixed text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {cartCount}
+            {items.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-yellow-500 text-on-primary-fixed text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg">
+                {items.length}
               </span>
             )}
           </div>

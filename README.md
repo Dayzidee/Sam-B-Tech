@@ -1,20 +1,44 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="SAM-B TECH Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# SAM-B TECH | Premium Tech Hub
 
-This contains everything you need to run your app locally.
+A high-performance, AI-driven tech ecosystem designed for precision diagnostics, professional repair management, and premium gadget retailing.
 
-View your app in AI Studio: https://ai.studio/apps/0ff78473-8947-46b8-980b-ad84c9e51bbb
+## 🌟 Key Features
+- **AI-Powered Diagnostics**: Leveraging Google Gemini for automated repair estimations and complexity analysis.
+- **Premium UX/UI**: Implemented with Tailwind CSS v4, Framer Motion, and a custom Global Loading strategy for a "Luxury Tech" feel.
+- **Enterprise Security**: Robust Role-Based Access Control (RBAC) partitioning endpoints for Technicians (Admins) and Customers.
+- **Real-time Infrastructure**: Firestore synchronization with Multi-tab IndexedDB persistence for lightning-fast, offline-ready performance.
+- **Media Optimization**: Integrated Cloudinary for high-fidelity product imaging and standardized asset management.
 
-## Run Locally
+## 🚀 Quick Start
 
-**Prerequisites:**  Node.js
+### Prerequisites
+- Node.js (v18+)
+- Firebase Account (Project ID: `sam-b-db`)
+- Cloudinary Account
+- Gemini API Key
 
+### Installation
+1.  **Clone & Install**:
+    ```bash
+    npm install
+    ```
+2.  **Environment Setup**:
+    Configure `.env` with your Firebase, Cloudinary, and Gemini credentials.
+3.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 📂 Project Architecture
+- `src/backend`: Firebase configuration and service layers.
+- `src/hooks/useAuth.tsx`: Centralized role and auth management.
+- `src/pages/Admin`: Technician-facing management modules.
+- `src/pages/Dashboard`: Customer-facing order and profile management.
+- `src/components/layout/GlobalLoader.tsx`: Premium animated transition system.
+
+---
+*Built with precision by the SAM-B TECH Engineering Team.*

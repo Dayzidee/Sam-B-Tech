@@ -7,9 +7,9 @@ export interface Product {
   rating: number;
   reviews: number;
   image: string;
-  condition: 'Brand New' | 'UK Used';
+  condition: 'Brand New' | 'UK Used' | 'Refurbished' | 'Pre-owned';
   isSale?: boolean;
   category: string;
 }
 
-export type Category = 'Smartphones' | 'Laptops & MacBooks' | 'Tablets & iPads' | 'Accessories';
+export type Category = 'ALL' | 'Phones' | 'Laptops' | 'Tablets' | 'Accessories' | 'Watches';
