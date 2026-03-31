@@ -53,27 +53,37 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center py-24 px-4">
-      <div className="max-w-md w-full bg-surface-container-lowest p-8 rounded-3xl shadow-xl">
-        <div className="text-center mb-8">
-          <h1 className="font-headline font-black text-3xl md:text-4xl mb-2">Create Account</h1>
-          <p className="text-secondary text-sm">Join Sam-B Tech to unlock exclusive deals, track orders, and more.</p>
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center py-24 px-4 overflow-hidden relative">
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-secondary/5 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="max-w-md w-full bg-white/70 backdrop-blur-2xl p-8 md:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative z-10 border border-white/50">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-6 shadow-sm">
+            <User className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="font-headline font-black text-3xl md:text-4xl mb-3 tracking-tight text-zinc-900">Create Account</h1>
+          <p className="text-zinc-500 text-sm font-medium">Join Sam-B Tech to unlock exclusive deals and track orders.</p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-6">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-xl text-sm font-bold text-center">
+            <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-2xl text-xs font-bold text-center animate-shake">
               {error}
             </div>
           )}
+          
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-secondary">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary w-5 h-5" />
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Full Name</label>
+            <div className="relative group">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-primary transition-colors w-5 h-5" />
               <Input 
                 type="text" 
                 placeholder="John Doe" 
-                className="pl-12 h-14 bg-surface-container-low border-transparent focus:border-primary focus:ring-primary"
+                className="pl-12 h-14 bg-white/50 border-zinc-200 focus:border-primary focus:ring-primary/20 rounded-2xl transition-all shadow-sm"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -82,13 +92,13 @@ const SignupPage = () => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-secondary">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary w-5 h-5" />
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Email Address</label>
+            <div className="relative group">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-primary transition-colors w-5 h-5" />
               <Input 
                 type="email" 
                 placeholder="you@example.com" 
-                className="pl-12 h-14 bg-surface-container-low border-transparent focus:border-primary focus:ring-primary"
+                className="pl-12 h-14 bg-white/50 border-zinc-200 focus:border-primary focus:ring-primary/20 rounded-2xl transition-all shadow-sm"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -97,13 +107,13 @@ const SignupPage = () => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-secondary">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary w-5 h-5" />
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Password</label>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-primary transition-colors w-5 h-5" />
               <Input 
                 type={showPassword ? "text" : "password"} 
                 placeholder="••••••••" 
-                className="pl-12 pr-12 h-14 bg-surface-container-low border-transparent focus:border-primary focus:ring-primary"
+                className="pl-12 pr-12 h-14 bg-white/50 border-zinc-200 focus:border-primary focus:ring-primary/20 rounded-2xl transition-all shadow-sm"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -112,17 +122,17 @@ const SignupPage = () => {
               <button 
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-primary transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            <p className="text-[10px] text-secondary mt-1">Must be at least 8 characters long.</p>
+            <p className="text-[10px] text-zinc-400 mt-1 ml-1">Must be at least 8 characters long.</p>
           </div>
 
           <Button 
             type="submit" 
-            className="w-full h-14 text-base font-bold uppercase tracking-widest flex items-center justify-center gap-2"
+            className="w-full h-16 text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 rounded-2xl shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-[0.98] bg-primary text-white"
             disabled={isLoading}
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
@@ -130,11 +140,13 @@ const SignupPage = () => {
           </Button>
         </form>
 
-        <div className="mt-8 text-center text-sm text-secondary">
-          Already have an account?{' '}
-          <Link to="/login" className="font-bold text-primary hover:underline">
-            Sign in
-          </Link>
+        <div className="mt-10 text-center">
+          <p className="text-sm text-zinc-400 font-medium">
+            Already have an account?{' '}
+            <Link to="/login" className="font-black text-primary uppercase tracking-widest hover:underline ml-1">
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
     </div>
