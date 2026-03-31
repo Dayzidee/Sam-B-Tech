@@ -1,4 +1,5 @@
-import { Share2, Mail } from 'lucide-react';
+import { Share2, Mail, MapPin, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
   return (
@@ -9,23 +10,34 @@ export const Footer = () => {
           <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
             The precision curator of high-end digital experiences and luxury tech gadgets in the heart of Ikorodu.
           </p>
+          <div className="flex items-center gap-2 text-sm text-zinc-500">
+            <MapPin className="w-4 h-4" />
+            <span>56 Obafemi Awolowo Rd, Ikorodu</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-zinc-500">
+            <Phone className="w-4 h-4" />
+            <span>+234 800-SAMB-TECH</span>
+          </div>
         </div>
         
         <div>
           <h4 className="text-sm font-extrabold uppercase tracking-widest text-black dark:text-white mb-6">Customer Care</h4>
           <ul className="space-y-3 text-sm font-medium">
-            <li><a className="text-zinc-500 hover:text-yellow-600 transition-all" href="#">Return Policy</a></li>
-            <li><a className="text-zinc-500 hover:text-yellow-600 transition-all" href="#">Warranty Terms</a></li>
-            <li><a className="text-zinc-500 hover:text-yellow-600 transition-all" href="#">Track Order</a></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/support">Help Center</Link></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/track-order">Track Order</Link></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/repair">Device Repair</Link></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/warranty-claims">Warranty Terms</Link></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/return-policy">Return Policy</Link></li>
           </ul>
         </div>
         
         <div>
-          <h4 className="text-sm font-extrabold uppercase tracking-widest text-black dark:text-white mb-6">Our Store</h4>
+          <h4 className="text-sm font-extrabold uppercase tracking-widest text-black dark:text-white mb-6">Shop & Explore</h4>
           <ul className="space-y-3 text-sm font-medium">
-            <li><a className="text-zinc-500 hover:text-yellow-600 transition-all" href="#">Women-Owned</a></li>
-            <li><a className="text-zinc-500 hover:text-yellow-600 transition-all" href="#">Secure Ordering</a></li>
-            <li><a className="text-zinc-500 hover:text-yellow-600 transition-all" href="#">Nationwide Delivery</a></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/gadgets">All Gadgets</Link></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/sales">Deals & Sales</Link></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/trade-in">Trade-In Program</Link></li>
+            <li><Link className="text-zinc-500 hover:text-yellow-600 transition-all" to="/admin">Admin Portal</Link></li>
           </ul>
         </div>
         
@@ -40,7 +52,7 @@ export const Footer = () => {
             </button>
           </div>
           <p className="mt-6 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-            © 2024 SAM-B TECH. 56 Obafemi Awolowo Rd, Ikorodu. Mon-Sat, Closes 6 PM.
+            © 2026 SAM-B TECH. All rights reserved. Mon-Sat, Closes 6 PM.
           </p>
         </div>
       </div>

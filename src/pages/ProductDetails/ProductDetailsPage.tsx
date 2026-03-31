@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { 
   ChevronRight, 
   BatteryCharging, 
@@ -6,10 +7,10 @@ import {
   Store, 
   ShoppingBag, 
   Award,
-  Star
+  Star,
+  Heart
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { formatCurrency, cn } from '@/utils';
@@ -22,21 +23,99 @@ const IMAGES = [
 ];
 
 export const ProductDetailsPage = () => {
+  const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
   const [condition, setCondition] = useState<'UK Used' | 'Brand New'>('UK Used');
   const [storage, setStorage] = useState('128GB');
   const [color, setColor] = useState('Sierra Blue');
+  const [isFavorite, setIsFavorite] = useState(false);
   const { addToCart } = useCartStore();
 
-  const product = {
-    name: "iPhone 13 Pro",
-    price: 685000,
-    oldPrice: 720000,
-    discount: "-5%",
-    batteryHealth: "98%",
-    rating: 4.9,
-    reviews: 124
-  };
+  // Mock database fetch based on ID
+  const [product, setProduct] = useState<any>(null);
+
+  useEffect(() => {
+    // Simulate fetching data based on ID
+    // In a real app, this would be an API call
+    const fetchProduct = () => {
+      // Mock data
+      const mockProducts: Record<string, any> = {
+        "1": {
+          id: "1",
+          name: "iPhone 14 Pro Max",
+          category: "Phones",
+          brand: "Apple",
+          price: 650000,
+          oldPrice: 765000,
+          discount: "-15%",
+          batteryHealth: "95%",
+          rating: 4.9,
+          reviews: 124,
+          images: [
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuC3E4exF9RTKw1NR9VBrOmtUoF1izrlWVo29-EAQ2U-JD0Z9rtfrND5SIr0eryYH859YotCw-QgUkwvu4iXlzOpheqyE8tCKHqc-vG8XdMIgDe68B8Orx3n-TmDZdtH1tFrXL8JTtL_CAFRk9zcdbXl0505TaSBIFwyJshuY2EKKbhE-oPtIJfGxT_Ohh8XMZCH5Lbo6_Wsgzb8qyJH0wKCj22-EhhI8VFzhiRpPQttCzdytiIIDlPbhD-RntS2TuzUcnVXCqqYAKM",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuCCHGA7AweiStJGSw5l5EjNTGR_R9m0RO0uijOONKFXvCdewaXmz5yDQFDDfmH9MlcMXSu6uM_ak0W0qbkL2mUvPyS7heOp0uT8PNo2kHPrcNHSaNmoXMS4KcPhfibN5i-SRZS5n5oyWya6JXIXlyKMKNDusTQP9hlC7T-xpE-YcjPlOYFGz1AfuHkf6y-XfcybnLW9iwOkGPVcoktPVudgthDBu2S6MDvF2P5GBDe_WBhuNHYvB5s_2lerGMb2J-3sda-2YASHql8"
+          ],
+          colors: [
+            { name: 'Deep Purple', hex: '#594F63' },
+            { name: 'Gold', hex: '#F5E7CF' },
+            { name: 'Silver', hex: '#F0F2F2' },
+            { name: 'Space Black', hex: '#2C2C2E' }
+          ],
+          storages: ['128GB', '256GB', '512GB', '1TB']
+        },
+        "2": {
+          id: "2",
+          name: "Apple Watch Series 8",
+          category: "Watches",
+          brand: "Apple",
+          price: 320000,
+          oldPrice: 380000,
+          discount: "-15%",
+          batteryHealth: "100%",
+          rating: 4.8,
+          reviews: 89,
+          images: [
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBBYp28NFo9ImbRIFzxxFPgU4pu9Sdf2NFWcZWwqn9TPh1U0YHFZydnWuyWQ_bl4OU-gQIpKZyM1dQWwW8v3rn4UsbxYEdVUHzu3YjQ0isUvR6eZVxAplrYglfxw37ZfQJ_cHJsTnIuYwq87xvESEkb1kTj22yn1pAd04vw_644GrAL-jlb7pFySltzet7m9Ip4STsqTA-qKz5Lh3HFapOIck__rbwxtqBj1PEGa5RRdqM8kZG97OIDj63LmNHpZdKzvTthM2FiEvU"
+          ],
+          colors: [
+            { name: 'Midnight', hex: '#1C1C1E' },
+            { name: 'Starlight', hex: '#F9F6EF' },
+            { name: 'Silver', hex: '#E3E4E5' }
+          ],
+          storages: ['41mm', '45mm']
+        },
+        "3": {
+          id: "3",
+          name: "MacBook Pro M2",
+          category: "Laptops",
+          brand: "Apple",
+          price: 950000,
+          oldPrice: 1100000,
+          discount: "-13%",
+          batteryHealth: "99%",
+          rating: 5.0,
+          reviews: 210,
+          images: [
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuC63IUAOIU6DzXcrWFJ3IBeI8IERRuxZZUL4wJvbWrJE6GTgEuyft_Yop9M1Laf4_8arnAvd_bDTbjZ57f_xuXL0r9DC6pyBmrZpw0Ys_Wf-g59Jl6o_JWZyGi5Ih22zNDdy9qZMEcUO4xoJVRyUZjj20OB3rXpUu4F0tJ1VpUQDk9WjKk5uOCls8QEFtUcZyr7mAT1fZoaIGxLW9paXZJJyAs7Dir1QF5_V2Kev54HdZwtsZgfJDO2hz-qMFQfQM2DPM_3W8BG_Jg"
+          ],
+          colors: [
+            { name: 'Space Gray', hex: '#7D7E80' },
+            { name: 'Silver', hex: '#E3E4E5' }
+          ],
+          storages: ['256GB', '512GB', '1TB']
+        }
+      };
+
+      const foundProduct = mockProducts[id || "1"] || mockProducts["1"];
+      setProduct(foundProduct);
+      setColor(foundProduct.colors[0].name);
+      setStorage(foundProduct.storages[0]);
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (!product) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
     <main className="pt-20 md:pt-24 pb-32 px-4 md:px-6 max-w-screen-2xl mx-auto">
@@ -46,9 +125,9 @@ export const ProductDetailsPage = () => {
         <ChevronRight className="w-3 h-3 flex-shrink-0" />
         <Link className="hover:text-primary transition-colors" to="/gadgets">Gadgets</Link>
         <ChevronRight className="w-3 h-3 flex-shrink-0" />
-        <span className="hover:text-primary transition-colors cursor-pointer">Phones</span>
+        <span className="hover:text-primary transition-colors cursor-pointer">{product.category}</span>
         <ChevronRight className="w-3 h-3 flex-shrink-0" />
-        <span className="hover:text-primary transition-colors cursor-pointer">Apple</span>
+        <span className="hover:text-primary transition-colors cursor-pointer">{product.brand}</span>
         <ChevronRight className="w-3 h-3 flex-shrink-0" />
         <span className="text-on-surface font-semibold">{product.name}</span>
       </nav>
@@ -58,7 +137,7 @@ export const ProductDetailsPage = () => {
         <div className="lg:col-span-7 flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Thumbnails */}
           <div className="flex md:flex-col order-2 md:order-1 gap-3 md:gap-4 overflow-x-auto md:overflow-y-auto no-scrollbar">
-            {IMAGES.map((img, i) => (
+            {product.images.map((img: string, i: number) => (
               <div 
                 key={i}
                 onClick={() => setSelectedImage(i)}
@@ -78,7 +157,7 @@ export const ProductDetailsPage = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="w-full h-full object-contain p-4 md:p-8 group-hover:scale-110 transition-transform duration-500" 
-              src={IMAGES[selectedImage]} 
+              src={product.images[selectedImage]} 
               alt={product.name}
               referrerPolicy="no-referrer"
             />
@@ -90,13 +169,21 @@ export const ProductDetailsPage = () => {
 
         {/* Right: Product Info */}
         <div className="lg:col-span-5 flex flex-col space-y-6 md:space-y-8">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-2 leading-tight">{product.name}</h1>
-            <div className="flex items-center gap-3 md:gap-4">
-              <span className="text-2xl md:text-3xl font-bold text-on-surface">{formatCurrency(product.price)}</span>
-              <span className="text-base md:text-lg text-secondary line-through">{formatCurrency(product.oldPrice)}</span>
-              <Badge variant="sale" className="text-[10px] md:text-xs">{product.discount}</Badge>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-2 leading-tight">{product.name}</h1>
+              <div className="flex items-center gap-3 md:gap-4">
+                <span className="text-2xl md:text-3xl font-bold text-on-surface">{formatCurrency(product.price)}</span>
+                <span className="text-base md:text-lg text-secondary line-through">{formatCurrency(product.oldPrice)}</span>
+                <Badge variant="sale" className="text-[10px] md:text-xs">{product.discount}</Badge>
+              </div>
             </div>
+            <button 
+              onClick={() => setIsFavorite(!isFavorite)}
+              className="p-3 rounded-full bg-surface-container-lowest border border-outline-variant/20 hover:bg-surface-container-low transition-colors"
+            >
+              <Heart className={cn("w-6 h-6", isFavorite ? "fill-red-500 text-red-500" : "text-secondary")} />
+            </button>
           </div>
 
           {/* Condition Selector */}
@@ -126,9 +213,9 @@ export const ProductDetailsPage = () => {
 
           {/* Storage */}
           <div className="space-y-3 md:space-y-4">
-            <h3 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-secondary">Storage Capacity</h3>
+            <h3 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-secondary">Storage Capacity / Size</h3>
             <div className="flex flex-wrap gap-2 md:gap-3">
-              {['128GB', '256GB', '512GB'].map((cap) => (
+              {product.storages.map((cap: string) => (
                 <button 
                   key={cap}
                   onClick={() => setStorage(cap)}
@@ -147,12 +234,7 @@ export const ProductDetailsPage = () => {
           <div className="space-y-3 md:space-y-4">
             <h3 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-secondary">Color: {color}</h3>
             <div className="flex gap-3 md:gap-4">
-              {[
-                { name: 'Sierra Blue', hex: '#9EABB9' },
-                { name: 'Gold', hex: '#F5E7CF' },
-                { name: 'Graphite', hex: '#2C2C2E' },
-                { name: 'Silver', hex: '#F0F2F2' }
-              ].map((c) => (
+              {product.colors.map((c: any) => (
                 <button 
                   key={c.name}
                   onClick={() => setColor(c.name)}
@@ -202,7 +284,14 @@ export const ProductDetailsPage = () => {
           {/* CTAs */}
           <div className="flex flex-col gap-2 md:gap-3">
             <Button 
-              onClick={addToCart}
+              onClick={() => addToCart({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                image: product.images[0],
+                category: product.category
+              })}
               variant="secondary" 
               size="lg" 
               className="w-full flex items-center justify-center gap-2 py-3 md:py-4 text-sm md:text-base"

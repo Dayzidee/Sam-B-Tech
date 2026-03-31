@@ -81,10 +81,13 @@ export const GadgetsPage = () => {
     );
   };
 
-  const filteredProducts = MOCK_PRODUCTS.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.brand.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = MOCK_PRODUCTS.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCondition = p.condition === condition;
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(p.category as Category);
+    return matchesSearch && matchesCondition && matchesCategory;
+  });
 
   return (
     <main className="pt-16 md:pt-20 pb-32 max-w-screen-2xl mx-auto px-4 sm:px-6">

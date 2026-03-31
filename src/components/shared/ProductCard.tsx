@@ -38,7 +38,14 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              addToCart();
+              addToCart({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                image: product.image,
+                category: product.category
+              });
             }}
             className="absolute bottom-4 right-4 bg-primary-container text-on-primary-fixed p-3 rounded-full opacity-0 translate-y-4 transition-all group-hover:opacity-100 group-hover:translate-y-0 shadow-lg"
           >

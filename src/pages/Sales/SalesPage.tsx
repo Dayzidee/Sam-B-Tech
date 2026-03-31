@@ -126,9 +126,11 @@ export const SalesPage = () => {
               <CountdownTimer />
             </div>
 
-            <Button size="lg" className="w-full sm:w-auto bg-tertiary hover:bg-tertiary/90 text-white px-10 shadow-xl shadow-tertiary/20 h-14 rounded-xl font-bold uppercase tracking-widest text-xs">
-              Claim Deal Now
-            </Button>
+            <Link to="/checkout" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full bg-tertiary hover:bg-tertiary/90 text-white px-10 shadow-xl shadow-tertiary/20 h-14 rounded-xl font-bold uppercase tracking-widest text-xs">
+                Claim Deal Now
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -147,7 +149,7 @@ export const SalesPage = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {hotDeals.map((deal) => (
-            <div key={deal.id} className="group relative bg-surface-container-lowest rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-2">
+            <Link to={`/product/${deal.id}`} key={deal.id} className="group relative bg-surface-container-lowest rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-2 block">
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 <span className="bg-tertiary text-white text-[10px] font-black px-2 py-1 rounded tracking-tighter uppercase italic">{deal.discount}</span>
                 <Badge variant={deal.condition === 'Brand New' ? 'new' : 'default'}>{deal.condition}</Badge>
@@ -169,14 +171,24 @@ export const SalesPage = () => {
                     <span className="text-secondary line-through text-xs">{formatCurrency(deal.oldPrice)}</span>
                   </div>
                   <button 
-                    onClick={addToCart}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      addToCart({
+                        id: deal.id,
+                        name: deal.name,
+                        price: deal.price,
+                        quantity: 1,
+                        image: deal.image,
+                        category: deal.category
+                      });
+                    }}
                     className="bg-primary-container p-3 rounded-full hover:bg-primary transition-colors"
                   >
                     <ShoppingCart className="w-5 h-5 text-on-primary-fixed" />
                   </button>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -190,7 +202,7 @@ export const SalesPage = () => {
           </div>
           <div className="flex flex-col lg:flex-row gap-6 md:gap-8">
             {/* Bundle 1 */}
-            <div className="flex-1 bg-white p-1 rounded-2xl group cursor-pointer relative shadow-sm hover:shadow-xl transition-shadow duration-500">
+            <Link to="/product/creator-suite" className="flex-1 bg-white p-1 rounded-2xl group cursor-pointer relative shadow-sm hover:shadow-xl transition-shadow duration-500 block">
               <div className="absolute top-4 right-4 md:top-6 md:right-6 bg-primary-container text-on-primary-fixed font-black px-3 py-1.5 md:px-4 md:py-2 rounded-lg z-10 shadow-lg text-xs md:text-base">
                 SAVE ₦85,000
               </div>
@@ -202,7 +214,22 @@ export const SalesPage = () => {
                     <span className="block text-secondary text-[10px] font-bold uppercase tracking-widest mb-1">Bundle Price</span>
                     <span className="text-on-background font-black text-3xl md:text-4xl">{formatCurrency(1380000)}</span>
                   </div>
-                  <Button className="w-full py-6 bg-black text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors uppercase tracking-widest text-xs">Add Bundle to Cart</Button>
+                  <Button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      addToCart({
+                        id: 'creator-suite',
+                        name: 'The Creator Suite',
+                        price: 1380000,
+                        quantity: 1,
+                        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD0KYlnM29mRapZO1FHi5tepAWQ_jd0CrsgqNJnn-Hwq6XWXHVf-_2UmcNX3T1a50TRMR031MfQrpbXph33ONtLSF9RQHXM3yBPcWSHwPKzMip04LkI0xU-DAMrn5F5Eouh6xHAfjx5MM1RRR_SUUStsGrvqOqlzQlw4TVBlPBqw-_Ldrzxguc3WO5V21A0qwLqA4t3HVxn6H4Z8TTRDuKNphkDGHaZyYvc64MJUVxnnBP4AZlV7VWK0zv3KcdtTFwHkQuL0AUYrAk',
+                        category: 'Bundle'
+                      });
+                    }}
+                    className="w-full py-6 bg-black text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors uppercase tracking-widest text-xs"
+                  >
+                    Add Bundle to Cart
+                  </Button>
                 </div>
                 <div className="md:w-1/2 relative bg-surface-container-highest flex items-center justify-center p-6 md:p-8 overflow-hidden rounded-xl min-h-[250px] md:min-h-0">
                   <img 
@@ -213,9 +240,9 @@ export const SalesPage = () => {
                   />
                 </div>
               </div>
-            </div>
+            </Link>
             {/* Bundle 2 */}
-            <div className="lg:w-1/3 bg-black rounded-2xl p-8 md:p-10 flex flex-col justify-between text-white relative overflow-hidden min-h-[400px] lg:min-h-0">
+            <Link to="/product/limited-edition" className="lg:w-1/3 bg-black rounded-2xl p-8 md:p-10 flex flex-col justify-between text-white relative overflow-hidden min-h-[400px] lg:min-h-0 block group">
               <div className="relative z-10">
                 <div className="bg-tertiary w-fit text-white font-bold px-3 py-1 rounded text-[10px] mb-4 md:mb-6 uppercase tracking-widest">Limited Edition</div>
                 <h3 className="font-headline font-extrabold text-2xl md:text-3xl mb-3 md:mb-4 leading-tight">MacBook Pro + Magic Mouse</h3>
@@ -228,13 +255,13 @@ export const SalesPage = () => {
               <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary-container/20 rounded-full blur-3xl"></div>
               <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
                 <img 
-                  className="w-full h-full object-cover" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjy2sYEDQxJGOwh2MFSqUiHaRMAG9Wk83FsHinvvegAORGDKGPVoblGjtSp81JCZ3g6WEZ12ajmFQ3EkYVKweJ-nTKztt6kRYCd-E04i7FTNON495Vl_vG-Y8A65t4JLFJ6mKko3FoIYcRf7gv-FKQLpYP_R_TtGah8GA-XDHMkBTSuIR3p0yW6JKChX6nBXMBK1Zp2JiPxdxSLjqGQdrpqXw0S6A6CxwRnOwYUFQOc-ry8EMurmi3OTebANy-Ji1wREXNrUc86NI" 
                   alt="MacBook Pro Bundle"
                   referrerPolicy="no-referrer"
                 />
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -247,7 +274,7 @@ export const SalesPage = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {/* Bento Item 1 */}
-          <div className="md:col-span-2 bg-surface-container-lowest p-6 md:p-8 rounded-xl flex flex-col sm:flex-row items-center justify-between group cursor-pointer hover:shadow-lg transition-all gap-6">
+          <Link to="/product/galaxy-buds2-pro" className="md:col-span-2 bg-surface-container-lowest p-6 md:p-8 rounded-xl flex flex-col sm:flex-row items-center justify-between group cursor-pointer hover:shadow-lg transition-all gap-6 block">
             <div className="w-full sm:w-1/2">
               <span className="text-tertiary font-black text-[10px] uppercase">Only 2 Left</span>
               <h4 className="font-headline font-bold text-xl md:text-2xl mt-2 mb-3 md:mb-4">Samsung Galaxy Buds2 Pro</h4>
@@ -265,9 +292,9 @@ export const SalesPage = () => {
                 referrerPolicy="no-referrer"
               />
             </div>
-          </div>
+          </Link>
           {/* Bento Item 2 */}
-          <div className="bg-primary-container p-6 md:p-8 rounded-xl flex flex-col justify-between group cursor-pointer hover:shadow-lg transition-all min-h-[250px]">
+          <Link to="/product/apple-watch-ultra-2" className="bg-primary-container p-6 md:p-8 rounded-xl flex flex-col justify-between group cursor-pointer hover:shadow-lg transition-all min-h-[250px] block">
             <div>
               <span className="bg-black text-white text-[10px] font-bold px-2 py-1 rounded">FINAL CALL</span>
               <h4 className="font-headline font-bold text-xl md:text-2xl mt-4 text-on-primary-fixed leading-tight">Apple Watch Ultra 2</h4>
@@ -277,9 +304,9 @@ export const SalesPage = () => {
               <span className="text-on-primary-fixed font-black text-2xl md:text-3xl">{formatCurrency(890000)}</span>
               <ShoppingBag className="w-8 h-8 md:w-10 md:h-10 text-on-primary-fixed/30 group-hover:translate-x-2 transition-transform" />
             </div>
-          </div>
+          </Link>
           {/* Bento Item 3 */}
-          <div className="bg-surface-container-lowest p-6 md:p-8 rounded-xl flex flex-col group cursor-pointer hover:shadow-lg transition-all border border-transparent hover:border-outline-variant">
+          <Link to="/product/bose-quietcomfort" className="bg-surface-container-lowest p-6 md:p-8 rounded-xl flex flex-col group cursor-pointer hover:shadow-lg transition-all border border-transparent hover:border-outline-variant block">
             <img 
               className="w-full h-40 md:h-48 object-contain mb-4 md:mb-6" 
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0Sd4GzAXkOWHI5d0lFaj9yhD1hv26bz5hkoBkro5g8t-m7IwUreHyzPPDZ3vGvhSXzg3IoHE7V6P1o8HPF26HbT8bqnvJ6MrOcTPgKavoM2FG9wG4dEIl00D3ijaCKw-sZ2M0xTPQcEcsxe1ryJVfUWHjb-TRAN0uUab6ddroeLYMTc6se0lH07lH8obDgEtWNiiCM7aM7EWYKpMyxwGt__YwNhuK1svQcnTNHSgc50esAX_ligDJvFc1DPGm4lhmOenpFENY75Y" 
@@ -294,9 +321,9 @@ export const SalesPage = () => {
                 <button className="bg-black text-white p-2 rounded-lg"><ArrowRight className="w-4 h-4" /></button>
               </div>
             </div>
-          </div>
+          </Link>
           {/* Bento Item 4 */}
-          <div className="md:col-span-2 bg-zinc-900 p-6 md:p-8 rounded-xl flex flex-col sm:flex-row items-center justify-between group cursor-pointer hover:shadow-xl transition-all gap-6">
+          <Link to="/product/iphone-13-128gb" className="md:col-span-2 bg-zinc-900 p-6 md:p-8 rounded-xl flex flex-col sm:flex-row items-center justify-between group cursor-pointer hover:shadow-xl transition-all gap-6 block">
             <div className="w-full sm:w-1/2 text-white">
               <span className="text-primary-container font-black text-[10px] uppercase tracking-widest">UK USED CLEARANCE</span>
               <h4 className="font-headline font-bold text-2xl md:text-3xl mt-2 mb-3 md:mb-4 leading-tight">iPhone 13 128GB</h4>
@@ -314,7 +341,7 @@ export const SalesPage = () => {
                 referrerPolicy="no-referrer"
               />
             </div>
-          </div>
+          </Link>
         </div>
       </section>
 

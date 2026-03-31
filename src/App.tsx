@@ -17,6 +17,14 @@ import { SupportPage } from '@/pages/Support/SupportPage';
 import { DashboardPage } from '@/pages/Dashboard/DashboardPage';
 import { FavouritesPage } from '@/pages/Favourites/FavouritesPage';
 import { CheckoutPage } from '@/pages/Checkout/CheckoutPage';
+import { RepairPage } from '@/pages/Repair/RepairPage';
+import { BlogPage } from '@/pages/Blog/BlogPage';
+import TrackOrderPage from '@/pages/Support/TrackOrderPage';
+import WarrantyClaimsPage from '@/pages/Support/WarrantyClaimsPage';
+import ReturnPolicyPage from '@/pages/Support/ReturnPolicyPage';
+import LoginPage from '@/pages/Auth/LoginPage';
+import SignupPage from '@/pages/Auth/SignupPage';
+import { AdminDashboardPage } from '@/pages/Admin/AdminDashboardPage';
 
 const ScrollToTop = ({ scrollRef }: { scrollRef: RefObject<HTMLElement | null> }) => {
   const { pathname } = useLocation();
@@ -48,7 +56,15 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/favourites" element={<FavouritesPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/repair" element={<RepairPage />} />
+            <Route path="/blog/:id" element={<BlogPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
+            <Route path="/track-order" element={<TrackOrderPage />} />
+            <Route path="/warranty-claims" element={<WarrantyClaimsPage />} />
+            <Route path="/return-policy" element={<ReturnPolicyPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/admin" element={<AdminDashboardPage />} />
             {/* Fallback for now */}
             <Route path="*" element={<HomePage />} />
           </Routes>

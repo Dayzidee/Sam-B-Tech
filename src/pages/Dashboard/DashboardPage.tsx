@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { 
   Package, 
   Repeat, 
@@ -7,13 +8,30 @@ import {
   ArrowRight,
   History,
   Smartphone,
-  Laptop
+  Laptop,
+  X,
+  User,
+  Mail,
+  MapPin
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { cn } from '@/utils';
 
 export const DashboardPage = () => {
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    fullName: 'Alexander Pierce',
+    email: 'a.pierce@precision.tech',
+    address: '4421 Tech Plaza, Silicon Valley,\nCA 94025, United States'
+  });
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsEditProfileOpen(false);
+    // Here you would typically save to the database
+  };
   const stats = [
     { 
       label: "Total Orders", 
@@ -112,24 +130,39 @@ export const DashboardPage = () => {
               <div className="space-y-8 md:space-y-10">
                 {/* Personal Info */}
                 <div>
-                  <h3 className="text-[10px] md:text-xs uppercase tracking-widest font-black text-secondary mb-4">Personal Info</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[10px] md:text-xs uppercase tracking-widest font-black text-secondary">Personal Info</h3>
+                    <button 
+                      onClick={() => setIsEditProfileOpen(true)}
+                      className="text-xs font-bold text-primary hover:underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
                   <div className="space-y-4">
                     <div className="group">
                       <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Full Name</label>
-                      <p className="text-sm font-semibold border-b border-outline-variant/30 pb-2 group-hover:border-primary-container transition-colors">Alexander Pierce</p>
+                      <p className="text-sm font-semibold border-b border-outline-variant/30 pb-2 group-hover:border-primary-container transition-colors">{profileData.fullName}</p>
                     </div>
                     <div className="group">
                       <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">Email Address</label>
-                      <p className="text-sm font-semibold border-b border-outline-variant/30 pb-2 group-hover:border-primary-container transition-colors">a.pierce@precision.tech</p>
+                      <p className="text-sm font-semibold border-b border-outline-variant/30 pb-2 group-hover:border-primary-container transition-colors">{profileData.email}</p>
                     </div>
                   </div>
                 </div>
                 {/* Shipping */}
                 <div>
-                  <h3 className="text-[10px] md:text-xs uppercase tracking-widest font-black text-secondary mb-4">Shipping Address</h3>
-                  <div className="bg-surface-container-lowest p-4 text-xs md:text-sm leading-relaxed text-secondary italic rounded-lg">
-                    4421 Tech Plaza, Silicon Valley,<br/>
-                    CA 94025, United States
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[10px] md:text-xs uppercase tracking-widest font-black text-secondary">Shipping Address</h3>
+                    <button 
+                      onClick={() => setIsEditProfileOpen(true)}
+                      className="text-xs font-bold text-primary hover:underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="bg-surface-container-lowest p-4 text-xs md:text-sm leading-relaxed text-secondary italic rounded-lg whitespace-pre-line">
+                    {profileData.address}
                   </div>
                 </div>
                 {/* Security */}
@@ -207,6 +240,86 @@ export const DashboardPage = () => {
             </div>
           </section>
         </div>
+
+        {/* Edit Profile Modal */}
+        <AnimatePresence>
+          {isEditProfileOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/50 backdrop-blur-sm">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-surface w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden"
+              >
+                <div className="p-6 md:p-8 border-b border-outline-variant/30 flex justify-between items-center">
+                  <h2 className="font-headline font-bold text-2xl">Edit Profile</h2>
+                  <button 
+                    onClick={() => setIsEditProfileOpen(false)}
+                    className="p-2 hover:bg-surface-container rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <form onSubmit={handleSaveProfile} className="p-6 md:p-8 space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-secondary">Full Name</label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary w-5 h-5" />
+                      <Input 
+                        type="text" 
+                        value={profileData.fullName}
+                        onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
+                        className="pl-12 h-14 bg-surface-container-low border-transparent focus:border-primary focus:ring-primary"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-secondary">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary w-5 h-5" />
+                      <Input 
+                        type="email" 
+                        value={profileData.email}
+                        onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                        className="pl-12 h-14 bg-surface-container-low border-transparent focus:border-primary focus:ring-primary"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-secondary">Shipping Address</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-4 text-secondary w-5 h-5" />
+                      <textarea 
+                        value={profileData.address}
+                        onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                        className="w-full pl-12 pr-4 py-4 min-h-[100px] bg-surface-container-low border-transparent focus:border-primary focus:ring-primary rounded-xl outline-none resize-none text-sm"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="pt-4 flex gap-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsEditProfileOpen(false)}
+                      className="flex-1 h-14 font-bold uppercase tracking-widest"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 h-14 font-bold uppercase tracking-widest"
+                    >
+                      Save Changes
+                    </Button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );

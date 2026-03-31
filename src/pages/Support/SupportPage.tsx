@@ -17,10 +17,15 @@ import {
   MessageCircle,
   Globe,
   HelpCircle,
-  Rss
+  Rss,
+  Package,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { cn } from '@/utils';
 
 interface FAQItemProps {
@@ -63,11 +68,38 @@ const FAQItem = ({ question, answer }: FAQItemProps) => {
 };
 
 export const SupportPage = () => {
+  const [orderId, setOrderId] = useState('');
+  const [isTracking, setIsTracking] = useState(false);
+  const [orderStatus, setOrderStatus] = useState<any>(null);
+
+  const handleTrack = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orderId.trim()) return;
+
+    setIsTracking(true);
+    // Simulate API call
+    setTimeout(() => {
+      setOrderStatus({
+        id: orderId,
+        status: 'In Transit',
+        estimatedDelivery: 'Oct 25, 2023',
+        steps: [
+          { title: 'Order Placed', date: 'Oct 20, 2023, 10:00 AM', completed: true },
+          { title: 'Processing', date: 'Oct 21, 2023, 02:30 PM', completed: true },
+          { title: 'Shipped', date: 'Oct 22, 2023, 09:15 AM', completed: true },
+          { title: 'In Transit', date: 'Oct 23, 2023, 04:45 PM', completed: false },
+          { title: 'Delivered', date: 'Pending', completed: false },
+        ]
+      });
+      setIsTracking(false);
+    }, 1500);
+  };
+
   const quickAccess = [
-    { icon: Truck, title: "Track My Order", desc: "Check the real-time status of your tech delivery.", action: "Enter Order ID" },
-    { icon: ShieldCheck, title: "Warranty Claims", desc: "Register your product or file a claim for repairs.", action: "Submit Claim" },
-    { icon: RotateCcw, title: "Return Policy", desc: "7-day easy returns for all verified tech gadgets.", action: "View Details" },
-    { icon: Wrench, title: "Device Repair", desc: "Book a session with our certified tech experts.", action: "Book Now", link: "#repair-section" }
+    { icon: Truck, title: "Track My Order", desc: "Check the real-time status of your tech delivery.", action: "Enter Order ID", link: "#track-order-section" },
+    { icon: ShieldCheck, title: "Warranty Claims", desc: "Register your product or file a claim for repairs.", action: "Submit Claim", link: "/warranty-claims" },
+    { icon: RotateCcw, title: "Return Policy", desc: "7-day easy returns for all verified tech gadgets.", action: "View Details", link: "/return-policy" },
+    { icon: Wrench, title: "Device Repair", desc: "Book a session with our certified tech experts.", action: "Book Now", link: "/repair" }
   ];
 
   const faqs = [
@@ -154,7 +186,7 @@ export const SupportPage = () => {
                     <h3 className="font-headline font-bold text-lg md:text-xl mb-2">{item.title}</h3>
                     <p className="text-secondary text-xs md:text-sm leading-relaxed">{item.desc}</p>
                   </div>
-                  <a 
+                  <a
                     className="mt-4 md:mt-6 inline-flex items-center text-primary font-bold text-xs md:text-sm uppercase tracking-wider group-hover:translate-x-1 transition-transform" 
                     href={item.link || "#"}
                   >
@@ -163,6 +195,73 @@ export const SupportPage = () => {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Track Order Section */}
+        <section className="px-6 md:px-8 py-16 md:py-24 bg-surface-container-lowest" id="track-order-section">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-10 md:mb-12">
+              <h2 className="font-headline font-extrabold text-3xl md:text-4xl mb-4">Track Your Order</h2>
+              <p className="text-secondary text-base md:text-lg">Enter your order ID to see the real-time status of your package.</p>
+            </div>
+
+            <div className="bg-surface p-6 md:p-8 rounded-2xl shadow-sm border border-outline-variant/20 mb-8">
+              <form onSubmit={handleTrack} className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary w-5 h-5" />
+                  <Input 
+                    type="text" 
+                    placeholder="e.g. SAMB-12345678" 
+                    className="pl-12 h-14 text-base md:text-lg bg-surface-container-lowest"
+                    value={orderId}
+                    onChange={(e) => setOrderId(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" size="lg" className="h-14 px-8 font-bold w-full sm:w-auto" disabled={isTracking}>
+                  {isTracking ? 'Tracking...' : 'Track Order'}
+                </Button>
+              </form>
+            </div>
+
+            {orderStatus && (
+              <div className="bg-surface p-6 md:p-8 rounded-2xl shadow-sm border border-outline-variant/20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-8 border-b border-outline-variant/30">
+                  <div>
+                    <p className="text-secondary text-xs md:text-sm font-bold uppercase tracking-widest mb-1">Order #{orderStatus.id}</p>
+                    <h2 className="font-headline font-bold text-xl md:text-2xl text-primary">{orderStatus.status}</h2>
+                  </div>
+                  <div className="mt-4 md:mt-0 text-left md:text-right">
+                    <p className="text-secondary text-xs md:text-sm font-bold uppercase tracking-widest mb-1">Estimated Delivery</p>
+                    <p className="font-headline font-bold text-lg md:text-xl">{orderStatus.estimatedDelivery}</p>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-outline-variant/30"></div>
+                  <div className="space-y-8 relative">
+                    {orderStatus.steps.map((step: any, index: number) => (
+                      <div key={index} className="flex gap-4 md:gap-6">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center relative z-10 shrink-0 transition-colors",
+                          step.completed ? "bg-primary text-on-primary" : "bg-surface-container-highest text-secondary"
+                        )}>
+                          {step.completed ? <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> : <Clock className="w-4 h-4 md:w-5 md:h-5" />}
+                        </div>
+                        <div>
+                          <h4 className={cn(
+                            "font-bold text-base md:text-lg",
+                            step.completed ? "text-on-background" : "text-secondary"
+                          )}>{step.title}</h4>
+                          <p className="text-secondary text-xs md:text-sm mt-0.5">{step.date}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
@@ -192,10 +291,12 @@ export const SupportPage = () => {
                   ))}
                 </div>
 
-                <Button className="mt-10 md:mt-12 w-full sm:w-auto bg-primary-container text-on-primary-fixed px-10 py-4 rounded-lg font-bold hover:brightness-110 transition-all shadow-lg flex items-center justify-center gap-3">
-                  <Calendar className="w-5 h-5" />
-                  Book a Repair Slot
-                </Button>
+                <Link to="/repair">
+                  <Button className="mt-10 md:mt-12 w-full sm:w-auto bg-primary-container text-on-primary-fixed px-10 py-4 rounded-lg font-bold hover:brightness-110 transition-all shadow-lg flex items-center justify-center gap-3">
+                    <Calendar className="w-5 h-5" />
+                    Book a Repair Slot
+                  </Button>
+                </Link>
               </div>
 
               <div className="lg:w-1/2 relative w-full max-w-lg mx-auto lg:max-w-none">

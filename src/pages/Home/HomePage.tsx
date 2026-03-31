@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   ShieldCheck, 
   BadgeCheck, 
@@ -15,7 +16,8 @@ import {
   Phone,
   ExternalLink,
   Wrench,
-  BatteryCharging
+  BatteryCharging,
+  X
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
@@ -42,7 +44,9 @@ const Hero = () => (
           <Link to="/gadgets" className="w-full sm:w-auto">
             <Button size="lg" className="px-8 w-full">Shop Now</Button>
           </Link>
-          <Button variant="outline" size="lg" className="px-8 w-full sm:w-auto">View Deals</Button>
+          <Link to="/sales" className="w-full sm:w-auto">
+            <Button variant="outline" size="lg" className="px-8 w-full sm:w-auto">View Deals</Button>
+          </Link>
         </div>
       </motion.div>
       <div className="relative h-[380px] sm:h-[500px] lg:h-[650px] order-1 lg:order-2 flex items-center justify-center">
@@ -205,16 +209,21 @@ const PromoSection = () => (
           <span className="inline-block bg-primary-container text-on-primary-fixed px-3 py-1 rounded text-[10px] md:text-xs font-black uppercase tracking-widest mb-4">Limited Partnership</span>
           <h2 className="text-white text-3xl md:text-6xl font-black tracking-tighter mb-4 md:mb-6">Upgrade Season <br/><span className="text-primary-container">Mega Sale</span></h2>
           <p className="text-zinc-300 text-sm md:text-lg mb-6 md:mb-8 line-clamp-2 md:line-clamp-none">Get up to ₦50,000 instant credit when you trade in your old iPhone for the 15 Pro series. Partnership valid this month only.</p>
-          <Button variant="secondary" size="lg" className="flex items-center gap-2 text-sm md:text-base">
-            Get Started <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
-          </Button>
+          <Link to="/sales">
+            <Button variant="secondary" size="lg" className="flex items-center gap-2 text-sm md:text-base">
+              Get Started <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
   </section>
 );
 
-const RepairSection = () => (
+const RepairSection = () => {
+  const [showCallModal, setShowCallModal] = useState(false);
+
+  return (
   <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 mb-24">
     <div className="bg-on-background rounded-3xl p-6 md:p-16 text-white grid grid-cols-1 lg:grid-cols-5 gap-10 md:gap-12 items-center relative overflow-hidden">
       <Wrench className="absolute -right-10 -bottom-10 w-[200px] h-[200px] md:w-[300px] md:h-[300px] opacity-5 pointer-events-none" />
@@ -244,12 +253,14 @@ const RepairSection = () => (
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-          <Button variant="secondary" size="lg" className="flex items-center justify-center gap-2 text-sm md:text-base w-full sm:w-auto">
-            <Calendar className="w-4 h-4 md:w-5 md:h-5" /> Book a Repair
-          </Button>
-          <a className="border border-white/20 px-8 md:px-10 py-3 md:py-4 rounded-md font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-sm md:text-base w-full sm:w-auto" href="tel:+2348123456789">
+          <Link to="/repair" className="w-full sm:w-auto">
+            <Button variant="secondary" size="lg" className="flex items-center justify-center gap-2 text-sm md:text-base w-full">
+              <Calendar className="w-4 h-4 md:w-5 md:h-5" /> Book a Repair
+            </Button>
+          </Link>
+          <button onClick={() => setShowCallModal(true)} className="border border-white/20 px-8 md:px-10 py-3 md:py-4 rounded-md font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-sm md:text-base w-full sm:w-auto">
             <Phone className="w-4 h-4 md:w-5 md:h-5" /> Call Our Techs
-          </a>
+          </button>
         </div>
       </div>
       <div className="lg:col-span-2 relative group z-10">
@@ -265,11 +276,44 @@ const RepairSection = () => (
         </div>
       </div>
     </div>
-  </section>
-);
 
-const BlogCard = ({ category, title, excerpt, date, readTime, image }: any) => (
-  <article className="group cursor-pointer">
+    {showCallModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-outline-variant/20 relative">
+          <button onClick={() => setShowCallModal(false)} className="absolute top-4 right-4 text-secondary hover:text-on-surface">
+            <X className="w-5 h-5" />
+          </button>
+          <h3 className="text-xl font-bold mb-4">Call Our Technicians</h3>
+          <p className="text-sm text-secondary mb-6">Select the department you need help with:</p>
+          <div className="space-y-3">
+            <a href="tel:+2348000000001" className="flex items-center gap-4 p-4 rounded-xl border border-outline-variant/20 hover:border-primary hover:bg-primary/5 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <Smartphone className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-bold text-sm">Phone Repair</p>
+                <p className="text-xs text-secondary">+234 800 000 0001</p>
+              </div>
+            </a>
+            <a href="tel:+2348000000002" className="flex items-center gap-4 p-4 rounded-xl border border-outline-variant/20 hover:border-primary hover:bg-primary/5 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <Laptop className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-bold text-sm">Laptop Repair</p>
+                <p className="text-xs text-secondary">+234 800 000 0002</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    )}
+  </section>
+  );
+};
+
+const BlogCard = ({ category, title, excerpt, date, readTime, image, id }: any) => (
+  <Link to={`/blog/${id}`} className="group cursor-pointer block">
     <div className="rounded-2xl overflow-hidden mb-4 md:mb-6 aspect-video bg-surface-container shadow-sm">
       <img 
         alt={title} 
@@ -284,7 +328,7 @@ const BlogCard = ({ category, title, excerpt, date, readTime, image }: any) => (
       <p className="text-secondary text-xs md:text-sm line-clamp-2">{excerpt}</p>
       <span className="text-[10px] md:text-xs text-zinc-400 font-medium">{date} · {readTime}</span>
     </div>
-  </article>
+  </Link>
 );
 
 const TechInsights = () => (
@@ -300,6 +344,7 @@ const TechInsights = () => (
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
       <BlogCard 
+        id="1"
         category="Pro Tips"
         title="How to maintain your iPhone battery health"
         excerpt="Simple habits that will keep your device running efficiently for years. Stop making these 3 common charging mistakes..."
@@ -308,6 +353,7 @@ const TechInsights = () => (
         image="https://lh3.googleusercontent.com/aida-public/AB6AXuAthakVx9kq_GHcu8zFDUCqB70hZzWC_SMqMzRQipEVNE97nyOYoIE8LTOCHoTmeKaV2xWa5DXeqctgASU7EjLSchpw64JYYCRcVNrXpBW-HlWjOY1pSB2jCX8JzilWQoF-44j_ojA3dGKW3O8impL7BlVqswPhwnk4UYj5tT1rherzRjbUiw-1Yo7dWNLHPfpmW3yW-FW9cWklYynJ68jYVEwB1QtGxQbKBR_PVIkUjt8m4AA-dmXKY6fNOXLWVoQfxDWUK0w1LAk"
       />
       <BlogCard 
+        id="2"
         category="Buying Guide"
         title="Top Gadgets for 2024: The Essential List"
         excerpt="From the Vision Pro to the latest ultra-thin laptops, these are the devices that will redefine how you work and play this year."
@@ -316,6 +362,7 @@ const TechInsights = () => (
         image="https://lh3.googleusercontent.com/aida-public/AB6AXuC3-KfvSMvNEr3cqzEq5W97YGAzVpRwutitKbtwATlS4OKAgYPm7Gr040LGeC_Z906U_P6xJtkOz8O8758ZZ4XIceOI9kodufdYHPmPGTOD_1h6NhkIJLx_-AWzhoD6M0FySGnY5q7i3D94uUqdoyFHJ_HcRzedcYl2gDIOso-1Bvu8Ura55mxv2AJ1rL4NISx3rh_2RU-O-1rI0V0P0OpA89Ik_q198kQLFqqwx5EoG3411McEbbW0bjU7XYzCRBxnc7yP739Rw24"
       />
       <BlogCard 
+        id="3"
         category="Workspace"
         title="Maximizing Productivity on your new MacBook"
         excerpt="Unlock the hidden macOS features that will save you hours every week. A complete guide for tech-savvy professionals."
